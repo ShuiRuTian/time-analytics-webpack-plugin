@@ -1,5 +1,5 @@
 import type { LoaderDefinition, Configuration, RuleSetRule } from 'webpack';
-import { loaderPath, PACKAGE_NAME } from './const';
+import { PACKAGE_LOADER_PATH, PACKAGE_NAME } from './const';
 import { assert, fail } from './utils';
 
 function normalizeRuleCore(rule: RuleSetRule) {
@@ -17,7 +17,7 @@ function normalizeRuleCore(rule: RuleSetRule) {
             fail(`${PACKAGE_NAME} does not support "Rule.use" option as a function now.`);
         }
         if (!Array.isArray(rule.use)) rule.use = [rule.use];
-        rule.use.unshift(loaderPath);
+        rule.use.unshift(PACKAGE_LOADER_PATH);
     }
 
     if (rule.oneOf) {
@@ -49,7 +49,7 @@ function normalizeRule(rule: RuleSetRule | undefined) {
     return normalizeRuleCore(rule);
 }
 
-function normalizeRules(rules: RuleSetRule[] | undefined): RuleSetRule[] | undefined {
+export function normalizeRules(rules: RuleSetRule[] | undefined): RuleSetRule[] | undefined {
     if (!rules) {
         return rules;
     }
