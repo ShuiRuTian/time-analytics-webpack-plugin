@@ -1,0 +1,7 @@
+{
+    "compilerOptions": {
+        "baseUrl": "./", // this must be specified if "paths" is specified.
+        "paths": {}
+    },
+    "extends": "@tsconfig/recommended/tsconfig.json"
+}
