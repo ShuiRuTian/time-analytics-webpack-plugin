@@ -1,6 +1,6 @@
 debugger;
 
-const Module = require("module");
+const Module = require('typescript');
 
 
 console.log(123);

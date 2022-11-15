@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import type { LoaderDefinition } from 'webpack';
-import path from 'path';
-import fs from 'fs';
 import { NS, PACKAGE_NAME } from './const';
 
-type HackLoaderFunction = (loader: LoaderDefinition, loaderPath: string) => any;
+type HackLoaderFunction = (loader: LoaderDefinition, loaderPath: string) => LoaderDefinition;
 
 function hackWrapLoaders(loaderPaths: string[], callback: HackLoaderFunction) {
     const wrapRequire = (requireMethod: NodeRequire) => {
@@ -34,14 +32,21 @@ function getLoaderName(path: string) {
     return (nodeModuleName && nodeModuleName[1]) || '';
 }
 
-const loader: LoaderDefinition = function () { };
+const loader: LoaderDefinition = function () {
+};
+
+/**
+ * Override `require` method, so that we could return a wrapped loader function.
+ * 
+ * Each time the wrapped function is called, we could do some extra work.
+ */
 loader.pitch = function (this, q, w, e) {
     if (this.data === e) {
         console.log('Context.data is the third parameter of pitch!');
     } else {
         console.log('Context.data is not the third parameter of pitch!');
-
     }
+    debugger;
     const callback = this[NS];
     const module = this.resourcePath;
     const loaderPaths = this.loaders
@@ -52,21 +57,21 @@ loader.pitch = function (this, q, w, e) {
     // loadLoaders
     hackWrapLoaders(loaderPaths, (loader, path) => {
         const loaderName = getLoaderName(path);
-        const wrapFunc = (func) =>
+        const wrapLoader = (loaderFunc: LoaderDefinition) =>
             function () {
                 const loaderId = id++;
                 const almostThis = Object.assign({}, this, {
-                    async: function () {
-                        const asyncCallback = this.async.apply(this, arguments);
+                    async: () => {
+                        const originCallback = this.async();
 
                         return function () {
                             callback({
                                 id: loaderId,
                                 type: 'end',
                             });
-                            return asyncCallback.apply(this, arguments);
+                            return originCallback(arguments);
                         };
-                    }.bind(this),
+                    },
                 });
 
                 callback({
@@ -75,7 +80,7 @@ loader.pitch = function (this, q, w, e) {
                     id: loaderId,
                     type: 'start',
                 });
-                const ret = func.apply(almostThis, arguments);
+                const ret = loaderFunc.apply(almostThis, arguments);
                 callback({
                     id: loaderId,
                     type: 'end',
@@ -83,10 +88,20 @@ loader.pitch = function (this, q, w, e) {
                 return ret;
             };
 
-        if (loader.normal) loader.normal = wrapFunc(loader.normal);
-        if (loader.default) loader.default = wrapFunc(loader.default);
-        if (loader.pitch) loader.pitch = wrapFunc(loader.pitch);
-        if (typeof loader === 'function') return wrapFunc(loader);
+        // @ts-ignore
+        if (loader.normal) {
+            console.log('In which condition will loader have a "normal" property?');
+            // @ts-ignore
+            loader.normal = wrapLoader(loader.normal);
+        }
+        // @ts-ignore
+        if (loader.default) {
+            console.log('In which condition will loader have a "default" property?');
+            // @ts-ignore
+            loader.default = wrapLoader(loader.default);
+        }
+        if (loader.pitch) loader.pitch = wrapLoader(loader.pitch);
+        if (typeof loader === 'function') return wrapLoader(loader);
         return loader;
     });
 };

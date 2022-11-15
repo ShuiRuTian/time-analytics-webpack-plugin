@@ -13,7 +13,6 @@ export function failInDebug(message?: string): never {
     throw e;
 }
 
-
 export function assert(expression: unknown, message?: string, verboseDebugInfo?: string | (() => string)): asserts expression {
     if (!expression) {
         message = message ? `False expression: ${message}` : 'False expression.';
@@ -21,31 +20,6 @@ export function assert(expression: unknown, message?: string, verboseDebugInfo?:
             message += '\r\nVerbose Debug Information: ' + (typeof verboseDebugInfo === 'string' ? verboseDebugInfo : verboseDebugInfo());
         }
         fail(message);
-    }
-}
-
-export function assertEqual<T>(a: T, b: T, msg?: string, msg2?: string): void {
-    if (a !== b) {
-        const message = msg ? msg2 ? `${msg} ${msg2}` : msg : '';
-        fail(`Expected ${a} === ${b}. ${message}`);
-    }
-}
-
-export function assertLessThan(a: number, b: number, msg?: string): void {
-    if (a >= b) {
-        fail(`Expected ${a} < ${b}. ${msg || ''}`);
-    }
-}
-
-export function assertLessThanOrEqual(a: number, b: number): void {
-    if (a > b) {
-        fail(`Expected ${a} <= ${b}`);
-    }
-}
-
-export function assertGreaterThanOrEqual(a: number, b: number): void {
-    if (a < b) {
-        fail(`Expected ${a} >= ${b}`);
     }
 }
 
