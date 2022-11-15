@@ -3,7 +3,7 @@ import { analyzer } from './analyzer';
 import { normalizeRules } from './ruleHelper';
 import { fail } from './utils';
 
-declare class WebpackPlugin {
+export declare class WebpackPlugin {
     /**
      * Apply the plugin
      */
