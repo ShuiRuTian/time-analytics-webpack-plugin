@@ -3,6 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@tsconfig/recommended': ^1.0.1
   '@types/node': ^16.11.56
+  '@types/tapable': ^2.2.2
   '@typescript-eslint/eslint-plugin': ^5.35.1
   '@typescript-eslint/parser': ^5.35.1
   eslint: ^8.23.0
@@ -11,6 +12,9 @@ specifiers:
   ts-node: ^10.9.0
   typescript: ^4.7.0
   webpack: ^5.75.0
+
+dependencies:
+  '@types/tapable': 2.2.2
 
 devDependencies:
   '@tsconfig/recommended': 1.0.1
@@ -188,6 +192,12 @@ packages:
   /@types/semver/7.3.13:
     resolution: {integrity: sha1-2kv9c/Sb1UHSiSCrDivw7oD3HJE=}
     dev: true
+
+  /@types/tapable/2.2.2:
+    resolution: {integrity: sha1-HTJLUkGQlUpXANhrYyi/xX4f2kg=}
+    dependencies:
+      tapable: 2.2.1
+    dev: false
 
   /@typescript-eslint/eslint-plugin/5.43.0_yy4vf4gcvxiubmg7fqa55dqe2i:
     resolution: {integrity: sha1-SlJI6zG0VHFd37+M+/SXUpoKeLw=}
@@ -1770,7 +1780,6 @@ packages:
   /tapable/2.2.1:
     resolution: {integrity: sha1-GWenPvQGCoLxKrlq+G1S/bdu7KA=}
     engines: {node: '>=6'}
-    dev: true
 
   /terser-webpack-plugin/5.3.6_webpack@5.75.0:
     resolution: {integrity: sha1-VZCuwxqjxvdxzhsazKYGOeqzGVw=}
