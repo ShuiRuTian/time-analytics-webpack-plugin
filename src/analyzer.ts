@@ -1,6 +1,12 @@
 import { PACKAGE_NAME } from './const';
 import { fail } from './utils';
 
+export enum TapType {
+    normal,
+    async,
+    promise,
+}
+
 export interface AnalyzeInfo {
     /**
      * The name of the plugin
@@ -13,6 +19,11 @@ export interface AnalyzeInfo {
      */
     tapId?: never;
     time: number;
+    tapType:TapType;
+    /**
+     * ID for each tap call.
+     */
+    tapCallId:string;
 }
 
 class WebpackTimeAnalyzer {
