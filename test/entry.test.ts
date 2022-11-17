@@ -1,6 +1,5 @@
 import { existsSync, readdirSync, statSync } from 'fs-extra';
 import { MONOREPO_FOLDER_PATH, repoInit } from './util';
-import type { webpack } from 'webpack';
 import path from 'path';
 import assert from 'assert';
 import { TimeAnalyticsPlugin } from 'time-analytics-plugin';
@@ -33,7 +32,7 @@ describe('Time Analyze Plugin', () => {
 
     // need `require` clause here to find the real `Webpack` packge, in fact, I think webpack only support cjs now
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const webpackFunc: typeof webpack = require(webpackPackagePath);
+    const webpackFunc: any = require(webpackPackagePath);
     const webpackConfigurationPath = path.join(repoPath, 'webpack.config.js');
 
     assert(existsSync(webpackPackagePath), 'each repo must have a webpack config called "webpack.config.js" in the root.');
@@ -45,7 +44,7 @@ describe('Time Analyze Plugin', () => {
 
     test('the example test case', async () => {
       return new Promise((resolve, reject) => {
-        webpackFunc(finalWebpackConfig, (err, stats) => {
+        webpackFunc(finalWebpackConfig, (err: any, stats: any) => {
           if (err || stats?.hasErrors()) return reject(err || stats);
           // const fileContent = standardConf.map(conf =>
           //   readFileSync(conf.output.path + "/bundle.js").toString()
