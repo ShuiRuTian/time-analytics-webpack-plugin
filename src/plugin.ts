@@ -1,4 +1,5 @@
-import type { Compiler, Configuration, ModuleOptions, RuleSetRule, WebpackPluginInstance } from 'webpack';
+import type { Compiler, Configuration, ModuleOptions,  RuleSetRule } from 'webpack';
+import { NormalModule } from 'webpack';
 import { analyzer } from './analyzer';
 import { ProxyPlugin } from './ProxyPlugin';
 import { normalizeRules } from './ruleHelper';
@@ -21,23 +22,32 @@ interface WebpackConfigFactory {
 
 export class TimeAnalyticsPlugin implements WebpackPlugin {
     public apply(compiler: Compiler) {
-
+        compiler.hooks.compilation.tap(TimeAnalyticsPlugin.name, (compilation) => {
+            NormalModule.getCompilationHooks(compilation).beforeLoaders.tap(TimeAnalyticsPlugin.name, (loaders, module, obj) => {
+                debugger;
+            });
+            NormalModule.getCompilationHooks(compilation).loader.tap(TimeAnalyticsPlugin.name, (loader, module) => {
+                debugger;
+            });
+        });
     }
-    
+
     public static wrap(webpackConfigOrFactory: Configuration, options?: TimeAnalyticsPluginOptions): Configuration;
     public static wrap(webpackConfigOrFactory: Configuration, options?: TimeAnalyticsPluginOptions): WebpackConfigFactory;
     public static wrap(webpackConfigOrFactory: Configuration | WebpackConfigFactory, options?: TimeAnalyticsPluginOptions) {
         analyzer.initilize();
+        const timeAnalyticsPlugin = new TimeAnalyticsPlugin();
         if (typeof webpackConfigOrFactory === 'function') {
-            return (...args: any[]) => wrapConfigurationCore(webpackConfigOrFactory(...args));
+            return (...args: any[]) => wrapConfigurationCore.call(timeAnalyticsPlugin, webpackConfigOrFactory(...args));
         }
-        return wrapConfigurationCore(webpackConfigOrFactory);
+        return wrapConfigurationCore.call(timeAnalyticsPlugin, webpackConfigOrFactory);
     }
 }
 
-function wrapConfigurationCore(config: Configuration): Configuration {
+function wrapConfigurationCore(this: TimeAnalyticsPlugin, config: Configuration): Configuration {
     if (config.plugins) {
         config.plugins = config.plugins.map(wrapPluginCore);
+        config.plugins = [this, ...config.plugins];
     }
     if (config.optimization && config.optimization.minimizer) {
         config.optimization.minimizer = config.optimization.minimizer

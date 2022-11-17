@@ -44,13 +44,6 @@ const loader: LoaderDefinition = function (source) {
  * Each time the wrapped function is called, we could do some extra work.
  */
 loader.pitch = function (this, q, w, e) {
-    console.log("hello from loader pitch");
-    if (this.data === e) {
-        console.log('Context.data is the third parameter of pitch!');
-    } else {
-        console.log('Context.data is not the third parameter of pitch!');
-    }
-    debugger;
     const callback = this[NS];
     const module = this.resourcePath;
     const loaderPaths = this.loaders
