@@ -4,6 +4,10 @@ import { compilerOptions } from './tsconfig.json';
 
 const config: JestConfigWithTsJest =
 {
+  /** jest */
+  globalSetup: './test/jest.setup.ts',
+  globalTeardown:'./test/jest.teardown.ts',
+
   /** ts-jest */
   preset: 'ts-jest',
   testEnvironment: 'node',

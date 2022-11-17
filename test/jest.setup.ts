@@ -1,7 +1,15 @@
+import { copyFileSync, fsyncSync } from 'fs';
+import path from 'path';
+import shelljs from 'shelljs';
+import { MONOREPO_FOLDER_PATH } from './util';
+
 require('ts-node').register({ transpileOnly: true });
 
 const setup = (): void => {
-    console.log('from global setup');
+    shelljs.pushd();
+    shelljs.cd(MONOREPO_FOLDER_PATH);
+    shelljs.exec('pnpm i');
+    shelljs.popd();
 };
 
 export default setup;

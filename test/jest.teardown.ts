@@ -1,7 +1,7 @@
 require('ts-node').register({ transpileOnly: true });
 
-const setup = (): void => {
-    console.log('from global teardown');
+const teardown = (): void => {
+    console.log('Hello from global teardown');
 };
 
-export default setup;
+export default teardown;
