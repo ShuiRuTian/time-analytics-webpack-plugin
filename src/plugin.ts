@@ -1,7 +1,8 @@
 import type { Compiler, Configuration, ModuleOptions, RuleSetRule, WebpackPluginInstance } from 'webpack';
 import { analyzer } from './analyzer';
+import { ProxyPlugin } from './ProxyPlugin';
 import { normalizeRules } from './ruleHelper';
-import { fail } from './utils';
+import { assert, fail } from './utils';
 
 export declare class WebpackPlugin {
     /**
@@ -18,7 +19,7 @@ interface WebpackConfigFactory {
     (...args: any[]): Configuration;
 }
 
-class TimeAnalyticsPlugin implements WebpackPlugin {
+export class TimeAnalyticsPlugin implements WebpackPlugin {
     public apply(compiler: Compiler) {
 
     }
@@ -29,15 +30,10 @@ class TimeAnalyticsPlugin implements WebpackPlugin {
     ) {
         analyzer.initilize();
         if (typeof webpackConfigOrFactory === 'function') {
-            return (...args) => wrapConfigurationCore(webpackConfigOrFactory(...args));
+            return (...args: any[]) => wrapConfigurationCore(webpackConfigOrFactory(...args));
         }
         return wrapConfigurationCore(webpackConfigOrFactory);
     }
-}
-
-function wrapPluginCore(plugin: WebpackPlugin): WebpackPlugin {
-    const pluginName = plugin.constructor.name;
-    return new WrappedPlugin(plugin, pluginName, analyzer);
 }
 
 function wrapConfigurationCore(config: Configuration): Configuration {
@@ -46,12 +42,26 @@ function wrapConfigurationCore(config: Configuration): Configuration {
     }
     if (config.optimization && config.optimization.minimizer) {
         config.optimization.minimizer = config.optimization.minimizer
-            .map(wrapPluginCore);
+            .map(wrapMinimizer);
     }
     if (config.module) {
         config.module = injectModule(config.module);
     }
     return config;
+}
+
+function isWebpackPlugin(a: any): a is WebpackPlugin {
+    return typeof a.apply === 'function';
+}
+
+function wrapMinimizer(minimizer: Configuration['optimization']['minimizer']): WebpackPlugin {
+    assert(isWebpackPlugin(minimizer), 'Could not handle if minimizer is not a plugin now.');
+    return wrapPluginCore(minimizer);
+}
+
+function wrapPluginCore(plugin: WebpackPlugin): WebpackPlugin {
+    const pluginName = plugin.constructor.name;
+    return new ProxyPlugin(plugin);
 }
 
 function injectModule(module: ModuleOptions) {

@@ -1,1 +1,0 @@
-import type { LoaderDefinition, Configuration } from 'webpack';
