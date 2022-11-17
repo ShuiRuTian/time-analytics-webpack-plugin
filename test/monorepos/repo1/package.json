@@ -1,8 +1,6 @@
 {
-    "private": true,
-    "name": "case1",
-    "version": "0.0.1",
-    "license": "MIT",
+  "name": "repo1",
+  "private": true,
     "engines": {
       "node": ">=14.0.0"
     },
