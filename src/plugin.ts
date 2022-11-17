@@ -23,11 +23,10 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
     public apply(compiler: Compiler) {
 
     }
-
-    public static wrap(
-        webpackConfigOrFactory: Configuration | WebpackConfigFactory,
-        options: TimeAnalyticsPluginOptions,
-    ) {
+    
+    public static wrap(webpackConfigOrFactory: Configuration, options?: TimeAnalyticsPluginOptions): Configuration;
+    public static wrap(webpackConfigOrFactory: Configuration, options?: TimeAnalyticsPluginOptions): WebpackConfigFactory;
+    public static wrap(webpackConfigOrFactory: Configuration | WebpackConfigFactory, options?: TimeAnalyticsPluginOptions) {
         analyzer.initilize();
         if (typeof webpackConfigOrFactory === 'function') {
             return (...args: any[]) => wrapConfigurationCore(webpackConfigOrFactory(...args));
@@ -54,7 +53,10 @@ function isWebpackPlugin(a: any): a is WebpackPlugin {
     return typeof a.apply === 'function';
 }
 
-function wrapMinimizer(minimizer: Configuration['optimization']['minimizer']): WebpackPlugin {
+type ArrayElement<ArrayType extends readonly unknown[]> =
+    ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
+
+function wrapMinimizer(minimizer: ArrayElement<NonNullable<NonNullable<Configuration['optimization']>['minimizer']>>): WebpackPlugin {
     assert(isWebpackPlugin(minimizer), 'Could not handle if minimizer is not a plugin now.');
     return wrapPluginCore(minimizer);
 }

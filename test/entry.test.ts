@@ -1,9 +1,9 @@
-import { PACKAGE_NAME } from '@src/const';
 import { existsSync, readdirSync, statSync } from 'fs-extra';
 import { MONOREPO_FOLDER_PATH, repoInit } from './util';
 import type { webpack } from 'webpack';
 import path from 'path';
-import { assert } from '@src/utils';
+import assert from 'assert';
+import { TimeAnalyticsPlugin } from 'time-analytics-plugin';
 
 describe('Time Analyze Plugin', () => {
   const allTestRepoPaths: string[] = [];
@@ -41,10 +41,11 @@ describe('Time Analyze Plugin', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const webpackConfig = require(webpackConfigurationPath);
 
-    test('the example test case', () => {
-      console.log('hello');
+    const finalWebpackConfig = TimeAnalyticsPlugin.wrap(webpackConfig);
+
+    test('the example test case', async () => {
       return new Promise((resolve, reject) => {
-        webpackFunc(webpackConfig, (err, stats) => {
+        webpackFunc(finalWebpackConfig, (err, stats) => {
           if (err || stats?.hasErrors()) return reject(err || stats);
           // const fileContent = standardConf.map(conf =>
           //   readFileSync(conf.output.path + "/bundle.js").toString()

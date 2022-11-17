@@ -1,3 +1,4 @@
+/* eslint-disable prefer-rest-params */
 /* eslint-disable @typescript-eslint/no-shadow */
 import type { LoaderDefinition } from 'webpack';
 import { NS, PACKAGE_NAME } from './const';
@@ -20,6 +21,7 @@ function hackWrapLoaders(loaderPaths: string[], callback: HackLoaderFunction) {
             return originExport;
         };
     };
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const Module = require('module');
     Module.prototype.require = wrapRequire(Module.prototype.require);
 }

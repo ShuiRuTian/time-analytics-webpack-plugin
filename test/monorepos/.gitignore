@@ -1,4 +1,5 @@
 */node_modules
+**/dist
 # ignore all files under 'common'
 */app.js
 */constants.js

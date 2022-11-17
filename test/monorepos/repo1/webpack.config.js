@@ -2,7 +2,7 @@ const path = require("path");
 const webpack = require("webpack");
 
 module.exports = {
-  mode: "production",
+  mode: "development",
   context: __dirname,
   entry: {
     bundle: "./app.js",

@@ -55,7 +55,7 @@ export class ProxyPlugin implements WebpackPlugin {
     private _isHooksProvider(candidate: any) {
         const className = candidate?.constructor?.name; // not a pretty accurate condition, but it should be enough.
         if (!className) return false;
-        return this._hookProviderCandidatesClassName.includes(candidate);
+        return this._hookProviderCandidatesClassName.includes(className);
     }
 
     private cachedProxyForHooksProvider = new Map();
@@ -63,7 +63,7 @@ export class ProxyPlugin implements WebpackPlugin {
     _proxyForHookProviderCandidates(
         candidate: any, // @types/webpack does not export all the types. Use `any` for now.
     ) {
-        if (this._isHooksProvider(candidate)) {
+        if (!this._isHooksProvider(candidate)) {
             return candidate;
         }
         return this._proxyForHooksProvider(candidate);

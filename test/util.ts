@@ -1,11 +1,10 @@
-import { assert } from '../src/utils';
 import { existsSync } from 'fs';
 import { copySync } from 'fs-extra';
 import path from 'path';
+import assert from 'assert';
 
 const MONOREPO_FOLDER_PATH = path.join(__dirname, 'monorepos');
 const COMMON_FOLDER_PATH = path.join(__dirname, 'common');
-
 
 assert(existsSync(COMMON_FOLDER_PATH), 'could not found "common" folder, which contains common files');
 assert(existsSync(MONOREPO_FOLDER_PATH), 'could not found "monorepo" folder, which is the root of each real test cases');
