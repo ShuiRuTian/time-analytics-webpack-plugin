@@ -2,7 +2,7 @@ import { existsSync, readdirSync, statSync } from 'fs-extra';
 import { MONOREPO_FOLDER_PATH, repoInit } from './util';
 import path from 'path';
 import assert from 'assert';
-import { TimeAnalyticsPlugin } from 'time-analytics-plugin';
+import { TimeAnalyticsPlugin } from 'time-analytics-webpack-plugin';
 
 describe('Time Analyze Plugin', () => {
   const allTestRepoPaths: string[] = [];

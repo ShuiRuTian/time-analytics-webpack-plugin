@@ -36,6 +36,25 @@
             "env": {
                 // "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.node.json"
             }
+          },
+          {
+            "name": "Current JS File",
+            "type": "node",
+            "request": "launch",
+            "args": [
+                "${relativeFile}"
+            ],
+            "runtimeArgs": [
+              "--nolazy",
+            ],
+            "sourceMaps": true,
+            "cwd": "${workspaceRoot}",
+            "protocol": "inspector",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "env": {
+                // "TS_NODE_PROJECT": "${workspaceFolder}/tsconfig.node.json"
+            }
           }
     ]
 }

@@ -25,7 +25,6 @@ type Tap = Hook<any, any>['tap'];
 type TapAsync = AsyncHook<any, any>['tapAsync'];
 type TapPromise = AsyncHook<any, any>['tapPromise'];
 
-type Q = Parameters<Tap>;
 type TapCallback = Parameters<Tap>[1];
 type TapAsyncCallback = Parameters<TapAsync>[1];
 type TapPromiseCallback = Parameters<TapPromise>[1];
@@ -42,6 +41,7 @@ export class ProxyPlugin implements WebpackPlugin {
     proxiedPluginName: string;
 
     constructor(proxiedPlugin: WebpackPlugin) {
+        validatePluginIsUsedOnce(proxiedPlugin);
         this._proxiedPlugin = proxiedPlugin;
         this.proxiedPluginName = proxiedPlugin.constructor.name;
     }

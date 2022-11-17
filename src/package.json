@@ -2,9 +2,9 @@
   "name": "time-analytics-webpack-plugin",
   "version": "0.0.1",
   "description": "",
-  "main": "/dist/index.js",
+  "main": "./dist/index.js",
+  "types": "./types",
   "scripts": {
-    "test": "jest",
     "build": "tsc -p ./tsconfig.json"
   },
   "author": "",

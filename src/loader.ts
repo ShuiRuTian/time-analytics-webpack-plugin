@@ -34,7 +34,8 @@ function getLoaderName(path: string) {
     return (nodeModuleName && nodeModuleName[1]) || '';
 }
 
-const loader: LoaderDefinition = function () {
+const loader: LoaderDefinition = function (source) {
+    return source;
 };
 
 /**
@@ -43,6 +44,7 @@ const loader: LoaderDefinition = function () {
  * Each time the wrapped function is called, we could do some extra work.
  */
 loader.pitch = function (this, q, w, e) {
+    console.log("hello from loader pitch");
     if (this.data === e) {
         console.log('Context.data is the third parameter of pitch!');
     } else {
@@ -108,4 +110,4 @@ loader.pitch = function (this, q, w, e) {
     });
 };
 
-export default loader;
+module.exports = loader;

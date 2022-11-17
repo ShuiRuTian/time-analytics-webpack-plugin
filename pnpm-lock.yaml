@@ -53,7 +53,7 @@ importers:
       fs-extra: ^10.1.0
       jest: ^29.3.1
       shelljs: ^0.8.5
-      time-analytics-plugin: workspace:*
+      time-analytics-webpack-plugin: workspace:*
       ts-jest: ^29.0.3
       ts-node: ^10.9.1
       typescript: ^4.7.0
@@ -65,7 +65,7 @@ importers:
       fs-extra: 10.1.0
       jest: 29.3.1_dnlfjp7n5lpfgnj4digwzn5fhe
       shelljs: 0.8.5
-      time-analytics-plugin: link:../src
+      time-analytics-webpack-plugin: link:../src
       ts-jest: 29.0.3_r24ewcothphvclnu77pxb4u4se
       ts-node: 10.9.1_e7yvbkxpwwqnzxz2s2bfjt7zx4
       typescript: 4.8.4
@@ -2091,14 +2091,6 @@ packages:
     resolution: {integrity: sha1-FQStJSMVjKpA20onh8sBQRmU6k8=}
     dev: true
 
-  /fsevents/2.3.2:
-    resolution: {integrity: sha1-ilJveLj99GI7cJ4Ll1xSwkwC/Ro=}
-    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
-    os: [darwin]
-    requiresBuild: true
-    dev: true
-    optional: true
-
   /function-bind/1.1.1:
     resolution: {integrity: sha1-pWiZ0+o8m6uHS7l3O3xe3pL0iV0=}
     dev: true
@@ -2647,7 +2639,7 @@ packages:
       micromatch: 4.0.5
       walker: 1.0.8
     optionalDependencies:
-      fsevents: 2.3.2
+      fsevents: registry.npmmirror.com/fsevents/2.3.2
     dev: true
 
   /jest-leak-detector/29.3.1:
@@ -3964,3 +3956,13 @@ packages:
     resolution: {integrity: sha1-ApTrPe4FAo0x7hpfosVWpqrxChs=}
     engines: {node: '>=10'}
     dev: true
+
+  registry.npmmirror.com/fsevents/2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/fsevents/-/fsevents-2.3.2.tgz}
+    name: fsevents
+    version: 2.3.2
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
+    requiresBuild: true
+    dev: true
+    optional: true

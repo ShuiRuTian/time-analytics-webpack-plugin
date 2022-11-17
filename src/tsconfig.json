@@ -3,6 +3,9 @@
     "compilerOptions": {
         "outDir": "./dist",
         "target": "ES2020",
+        "declaration": true,
+        "sourceMap": true,
+        "declarationDir": "types",
         "resolveJsonModule": true
     },
 }
