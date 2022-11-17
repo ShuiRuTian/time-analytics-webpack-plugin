@@ -1,24 +1,27 @@
+const path = require("path");
 const webpack = require("webpack");
 
 module.exports = {
+  mode: "production",
+  context: __dirname,
   entry: {
-    bundle: ["./app.js"],
+    bundle: "./app.js",
   },
   output: {
-    path: __dirname + "/dist"
+    path: path.join(__dirname, "./dist")
   },
   plugins: [
     new webpack.DefinePlugin({ FOO: "'BAR'" })
   ],
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.js?$/,
-        loader: "babel-loader"
+        use: "babel-loader"
       },
       {
         test: /\.css$/,
-        loaders: ["style-loader", "css-loader"]
+        use: ["style-loader", "css-loader"]
       }
     ]
   }

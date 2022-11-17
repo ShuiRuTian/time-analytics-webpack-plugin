@@ -6,7 +6,8 @@ const config: JestConfigWithTsJest =
 {
   /** jest */
   globalSetup: './test/jest.setup.ts',
-  globalTeardown:'./test/jest.teardown.ts',
+  globalTeardown: './test/jest.teardown.ts',
+  testTimeout: 20_000, // webpack might be time cosuming, leave enough time.
 
   /** ts-jest */
   preset: 'ts-jest',
