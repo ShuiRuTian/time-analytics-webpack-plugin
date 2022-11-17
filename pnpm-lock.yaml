@@ -2,6 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   '@tsconfig/recommended': ^1.0.1
+  '@types/fs-extra': ^9.0.13
   '@types/jest': ^29.2.3
   '@types/node': ^16.11.56
   '@types/shelljs': ^0.8.11
@@ -11,6 +12,7 @@ specifiers:
   eslint: ^8.23.0
   eslint-config-airbnb-typescript: ^17.0.0
   eslint-plugin-import: ^2.26.0
+  fs-extra: ^10.1.0
   jest: ^29.3.1
   shelljs: ^0.8.5
   ts-jest: ^29.0.3
@@ -20,6 +22,7 @@ specifiers:
 
 devDependencies:
   '@tsconfig/recommended': 1.0.1
+  '@types/fs-extra': 9.0.13
   '@types/jest': 29.2.3
   '@types/node': 16.18.3
   '@types/shelljs': 0.8.11
@@ -29,6 +32,7 @@ devDependencies:
   eslint: 8.27.0
   eslint-config-airbnb-typescript: 17.0.0_qelnffkpvj6kadrplfc7575xwa
   eslint-plugin-import: 2.26.0_wbsj7pk5g7hogwvhsif6xntns4
+  fs-extra: 10.1.0
   jest: 29.3.1_dnlfjp7n5lpfgnj4digwzn5fhe
   shelljs: 0.8.5
   ts-jest: 29.0.3_r24ewcothphvclnu77pxb4u4se
@@ -804,6 +808,12 @@ packages:
 
   /@types/estree/0.0.51:
     resolution: {integrity: sha1-z9cJJKJaP9MrIY5eQg5ol+GsT0A=}
+    dev: true
+
+  /@types/fs-extra/9.0.13:
+    resolution: {integrity: sha1-dZT7rgT+fxkYzos9IT90/0SsH0U=}
+    dependencies:
+      '@types/node': 16.18.3
     dev: true
 
   /@types/glob/8.0.0:
@@ -2038,6 +2048,15 @@ packages:
     resolution: {integrity: sha1-YJ85IHy2FLidB2W0d8stQ3+/l4c=}
     dev: true
 
+  /fs-extra/10.1.0:
+    resolution: {integrity: sha1-Aoc8+8QITd4SfqpfmQXu8jJdGr8=}
+    engines: {node: '>=12'}
+    dependencies:
+      graceful-fs: 4.2.10
+      jsonfile: 6.1.0
+      universalify: 2.0.0
+    dev: true
+
   /fs.realpath/1.0.0:
     resolution: {integrity: sha1-FQStJSMVjKpA20onh8sBQRmU6k8=}
     dev: true
@@ -2907,6 +2926,14 @@ packages:
     hasBin: true
     dev: true
 
+  /jsonfile/6.1.0:
+    resolution: {integrity: sha1-vFWyY0eTxnnsZAMJTrE2mKbsCq4=}
+    dependencies:
+      universalify: 2.0.0
+    optionalDependencies:
+      graceful-fs: 4.2.10
+    dev: true
+
   /kleur/3.0.3:
     resolution: {integrity: sha1-p5yezIbuHOP6YgbRIWxQHxR/wH4=}
     engines: {node: '>=6'}
@@ -3731,6 +3758,11 @@ packages:
       has-bigints: 1.0.2
       has-symbols: 1.0.3
       which-boxed-primitive: 1.0.2
+    dev: true
+
+  /universalify/2.0.0:
+    resolution: {integrity: sha1-daSYTv7cSwiXXFrrc/Uw0C3yVxc=}
+    engines: {node: '>= 10.0.0'}
     dev: true
 
   /update-browserslist-db/1.0.10_browserslist@4.21.4:

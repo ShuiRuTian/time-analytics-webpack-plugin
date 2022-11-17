@@ -1,1 +1,5 @@
 */node_modules
+# ignore all files under 'common'
+*/app.js
+*/constants.js
+*/styles.css
