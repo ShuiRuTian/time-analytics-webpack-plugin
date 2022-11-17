@@ -5,20 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "pwa-node",
+            "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}\\index.ts",
-            "outFiles": [
-                "${workspaceFolder}/**/*.js"
-            ]
+            // "skipFiles": [
+            //     "<node_internals>/**"
+            // ],
+            "program": "${workspaceFolder}\\node_modules\\jest\\bin\\jest.js",
+            // "outFiles": [
+            //     "${workspaceFolder}/**/*.js"
+            // ]
         },
         {
             "name": "Current TS File",
-            "type": "pwa-node",
+            "type": "node",
             "request": "launch",
             "args": [
                 "${relativeFile}"
