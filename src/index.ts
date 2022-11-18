@@ -1,1 +1,1 @@
-export { TimeAnalyticsPlugin } from './plugin';
+export { TimeAnalyticsPlugin } from './TimeAnalyticsPlugin';

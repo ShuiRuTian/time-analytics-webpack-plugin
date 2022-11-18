@@ -6,7 +6,7 @@ import type { AsyncHook, Hook } from 'tapable';
 import { isSymbolObject } from 'util/types';
 import type { Compiler, WebpackPluginFunction, WebpackPluginInstance } from 'webpack';
 import { analyzer, TapType } from './analyzer';
-import { WebpackPlugin } from './plugin';
+import { WebpackPlugin } from './TimeAnalyticsPlugin';
 import { assert, fail } from './utils';
 
 const injectedPlugins = new Set<WebpackPluginInstance>();
