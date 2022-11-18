@@ -1,5 +1,3 @@
-import { copyFileSync, fsyncSync } from 'fs';
-import path from 'path';
 import shelljs from 'shelljs';
 import { MONOREPO_FOLDER_PATH } from './util';
 

@@ -34,3 +34,7 @@ export function assertNever(member: never, message = 'Assert never:'): never {
     const detail = JSON.stringify(member);
     return failInDebug(`${message} ${detail}`);
 }
+
+export function now() {
+    return performance.now();
+}

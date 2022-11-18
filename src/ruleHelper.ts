@@ -17,6 +17,7 @@ function normalizeRuleCore(rule: RuleSetRule) {
             fail(`${PACKAGE_NAME} does not support "Rule.use" option as a function now.`);
         }
         if (!Array.isArray(rule.use)) rule.use = [rule.use];
+        // Inject into the first one, so that our loader's pitch function is always called at first.
         rule.use.unshift(PACKAGE_LOADER_PATH);
     }
 

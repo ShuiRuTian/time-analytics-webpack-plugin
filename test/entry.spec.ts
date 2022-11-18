@@ -4,6 +4,8 @@ import path from 'path';
 import assert from 'assert';
 import { TimeAnalyticsPlugin } from 'time-analytics-webpack-plugin';
 
+const web = require('webpack');
+
 describe('Time Analyze Plugin', () => {
   const allTestRepoPaths: string[] = [];
   readdirSync(MONOREPO_FOLDER_PATH).forEach(filePath => {

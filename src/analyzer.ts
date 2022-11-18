@@ -1,13 +1,54 @@
 import { PACKAGE_NAME } from './const';
 import { fail } from './utils';
 
+
+
+export enum AnalyzeInfoKind {
+    loader,
+    plugin,
+}
+
+export enum LoaderType {
+    pitch,
+    normal,
+}
+
+export enum LoaderEventType {
+    start,
+    end,
+}
+
+export interface LoaderEventInfo {
+    kind: AnalyzeInfoKind.loader;
+    loaderType: LoaderType;
+    /**
+     * the absolute path to the loader
+     */
+    path: string;
+    time: number;
+    /**
+     * source file that the loader is handling
+     */
+    resourcePath: string;
+    /**
+     * what does this event stands for, start or end.
+     */
+    eventType: LoaderEventType;
+}
+
 export enum TapType {
     normal,
     async,
     promise,
 }
 
-export interface AnalyzeInfo {
+export enum PluginEventType {
+    start,
+    end,
+}
+
+export interface PluginEventInfo {
+    kind: AnalyzeInfoKind.plugin;
     /**
      * The name of the plugin
      */
@@ -19,12 +60,18 @@ export interface AnalyzeInfo {
      */
     tapId?: never;
     time: number;
-    tapType:TapType;
+    tapType: TapType;
     /**
      * ID for each tap call.
      */
-    tapCallId:string;
+    tapCallId: string;
+    /**
+     * what does this event stands for, start or end.
+     */
+    eventType: PluginEventType;
 }
+
+export type AnalyzeEventInfo = LoaderEventInfo | PluginEventInfo;
 
 class WebpackTimeAnalyzer {
     private _isInitilized = false;
@@ -36,7 +83,11 @@ class WebpackTimeAnalyzer {
         this._isInitilized = true;
     }
 
-    collectInfo(analyzeInfo: AnalyzeInfo) { }
+    collectLoaderInfo(loaderInfo: LoaderEventInfo) { }
+    
+    collectPluginInfo(pluginInfo: PluginEventInfo) { }
+
+    collectInfo(analyzeInfo: AnalyzeEventInfo) { }
 }
 
 export const analyzer = new WebpackTimeAnalyzer();
