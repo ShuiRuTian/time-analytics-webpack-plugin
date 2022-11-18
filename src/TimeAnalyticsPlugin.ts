@@ -24,10 +24,10 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
     public apply(compiler: Compiler) {
         compiler.hooks.compilation.tap(TimeAnalyticsPlugin.name, (compilation) => {
             NormalModule.getCompilationHooks(compilation).loader.tap(TimeAnalyticsPlugin.name, (loader, module) => {
-                debugger;
+                // debugger;
             });
             NormalModule.getCompilationHooks(compilation).beforeLoaders.tap(TimeAnalyticsPlugin.name, (loaders, module, obj) => {
-                debugger;module.debugId
+                // debugger;
             });
         });
     }

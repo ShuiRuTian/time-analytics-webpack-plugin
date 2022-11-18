@@ -28,18 +28,27 @@ function hackWrapLoaders(loaderPaths: string[], callback: HackLoaderFunction) {
         wrappedRequire.main = requireMethod.main;
         return wrappedRequire;
     };
+
+    // @ts-ignore
+    if (typeof System === 'object' && typeof System.import === 'function') {
+        // @ts-ignore
+        debugger;
+        // @ts-ignore
+        System.import = wrapReq(System.import);
+    }
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const Module = require('module');
     Module.prototype.require = wrapRequire(Module.prototype.require);
-    require('webpack');
 }
 
-let id = 0;
-
 function getLoaderName(path: string) {
+    // get the folder name after the last "node_moduels"
     const standardPath = path.replace(/\\/g, '/');
-    const nodeModuleName = /\/node_modules\/([^/]+)/.exec(standardPath);
-    return (nodeModuleName && nodeModuleName[1]) || '';
+    const targetString = '/node_modules/';
+    const index = standardPath.lastIndexOf(targetString);
+    const sub = standardPath.substring(index + targetString.length);
+    const loaderName = sub.substring(0, sub.indexOf('/'));
+    return loaderName || '';
 }
 
 function isNormalLoaderFunc(loaderFunc: LoaderDefinition | PitchLoaderDefinitionFunction): loaderFunc is LoaderDefinition {
@@ -66,27 +75,28 @@ loader.pitch = function (this, q, w, e) {
     // loadLoaders
     hackWrapLoaders(loaderPaths, (loader, path) => {
         const loaderName = getLoaderName(path);
-        const wrapLoader = (loaderFunc: LoaderDefinition | PitchLoaderDefinitionFunction) =>
-            function () {
-                const loaderId = id++;
-                const loaderType = isNormalLoaderFunc(loaderFunc) ? LoaderType.pitch : LoaderType.normal;
-                const almostThis: any = Object.assign({}, this, {
-                    async: () => {
-                        const originCallback = this.async();
+        const wrapLoader = (originLoader: LoaderDefinition | PitchLoaderDefinitionFunction) =>
+            function wrappedLoader() {
 
-                        return function () {
-                            analyzerInstance.collectLoaderInfo({
-                                kind: AnalyzeInfoKind.loader,
-                                eventType: LoaderEventType.end,
-                                loaderType,
-                                path,
-                                resourcePath,
-                                time: now(),
-                            });
-                            return originCallback(arguments);
-                        };
-                    },
-                });
+                const loaderType = isNormalLoaderFunc(originLoader) ? LoaderType.pitch : LoaderType.normal;
+
+                // const almostThis: any = Object.assign({}, this, {
+                //     async: () => {
+                //         const originCallback = this.async(arguments);
+
+                //         return function () {
+                //             analyzerInstance.collectLoaderInfo({
+                //                 kind: AnalyzeInfoKind.loader,
+                //                 eventType: LoaderEventType.end,
+                //                 loaderType,
+                //                 path,
+                //                 resourcePath,
+                //                 time: now(),
+                //             });
+                //             return originCallback.apply(this, arguments);
+                //         };
+                //     },
+                // });
 
                 analyzerInstance.collectLoaderInfo({
                     kind: AnalyzeInfoKind.loader,
@@ -97,7 +107,7 @@ loader.pitch = function (this, q, w, e) {
                     time: now(),
                 });
 
-                const ret = loaderFunc.apply(almostThis, arguments);
+                const ret = originLoader.apply(this, arguments);
 
                 analyzerInstance.collectLoaderInfo({
                     kind: AnalyzeInfoKind.loader,

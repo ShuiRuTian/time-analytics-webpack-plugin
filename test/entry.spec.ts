@@ -1,23 +1,21 @@
 import { existsSync, readdirSync, statSync } from 'fs-extra';
-import { MONOREPO_FOLDER_PATH, repoInit } from './util';
 import path from 'path';
 import assert from 'assert';
 import { TimeAnalyticsPlugin } from 'time-analytics-webpack-plugin';
-
-const web = require('webpack');
+import { MONOREPO_FOLDER_PATH, repoInit } from './util';
 
 describe('Time Analyze Plugin', () => {
   const allTestRepoPaths: string[] = [];
-  readdirSync(MONOREPO_FOLDER_PATH).forEach(filePath => {
-    const stat = statSync(filePath);
-    if (stat.isDirectory() && !filePath.includes('node_modules')) {
-      const repoName = path.basename(filePath);
-      allTestRepoPaths.push(repoName);
-    }
-  });
+  // readdirSync(MONOREPO_FOLDER_PATH).forEach(filePath => {
+  //   const stat = statSync(filePath);
+  //   if (stat.isDirectory() && !filePath.includes('node_modules')) {
+  //     const repoName = path.basename(filePath);
+  //     allTestRepoPaths.push(repoName);
+  //   }
+  // });
 
   allTestRepoPaths.forEach(repoPath => {
-    // 
+    //
   });
 
   const REPO_NAME = 'repo1';
@@ -44,7 +42,7 @@ describe('Time Analyze Plugin', () => {
 
     const finalWebpackConfig = TimeAnalyticsPlugin.wrap(webpackConfig);
 
-    test('the example test case', async () => {
+    it('the example test case', async () => {
       return new Promise((resolve, reject) => {
         webpackFunc(finalWebpackConfig, (err: any, stats: any) => {
           if (err || stats?.hasErrors()) return reject(err || stats);

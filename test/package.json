@@ -7,13 +7,17 @@
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
     "@types/jest": "^29.2.3",
+    "@types/mocha": "^10.0.0",
     "@types/node": "^16.11.56",
     "@types/shelljs": "^0.8.11",
     "fs-extra": "^10.1.0",
     "jest": "^29.3.1",
+    "mocha": "^10.1.0",
     "shelljs": "^0.8.5",
-    "ts-jest": "^29.0.3",
-    "ts-node": "^10.9.1",
-    "time-analytics-webpack-plugin": "workspace:*"
+    "time-analytics-webpack-plugin": "workspace:*",
+    "ts-jest": "^29.0.3"
+  },
+  "dependencies": {
+    "ts-node": "^10.9.1"
   }
 }
