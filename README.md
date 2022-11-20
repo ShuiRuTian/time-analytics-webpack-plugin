@@ -5,6 +5,9 @@
 jest mocks "require" and not use the default `require`(maybe it use cache).
 However, we need to mock `require` to do some tricks to loaders.
 
+1. why monorepo?
+To test the source code just like the real case.
+
 ## Questions
 1. In which condition, will `this.callback()` called, the doc says for multiple results, but it's kind of confused.
 

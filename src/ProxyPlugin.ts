@@ -1,11 +1,12 @@
-/* eslint-disable @typescript-eslint/no-shadow */
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/no-this-alias */ // use function, so that we could put logic firstly
+/* eslint-disable @typescript-eslint/no-shadow */ // could not come up with that many name
+/* eslint-disable @typescript-eslint/naming-convention */ // use _ as private field name
 import { randomUUID } from 'crypto';
 import { performance } from 'perf_hooks';
 import type { AsyncHook, Hook } from 'tapable';
 import { isSymbolObject } from 'util/types';
 import type { Compiler, WebpackPluginFunction, WebpackPluginInstance } from 'webpack';
-import { analyzer, TapType } from './analyzer';
+import { AnalyzeInfoKind, analyzer, PluginEventType, TapType } from './analyzer';
 import { WebpackPlugin } from './TimeAnalyticsPlugin';
 import { assert, fail } from './utils';
 
@@ -47,7 +48,10 @@ export class ProxyPlugin implements WebpackPlugin {
     }
 
     apply(compiler: Compiler): void {
-        this._proxyForHookProviderCandidates(compiler);
+        const proxiedCompiler =
+            compiler;
+            // this._proxyForHookProviderCandidates(compiler);
+        this._proxiedPlugin.apply(proxiedCompiler);
     }
 
     private _hookProviderCandidatesClassName = ['Compiler', 'Compilation', 'ContextModuleFactory', 'JavascriptParser', 'NormalModuleFactory'];
@@ -72,7 +76,7 @@ export class ProxyPlugin implements WebpackPlugin {
     private _proxyForHooksProvider(
         hooksProvider: any, // @types/webpack does not export all the types. Use `any` for now.
     ) {
-        const { _proxyForHooks } = this;
+        const that = this;
         return getOrCreate(this.cachedProxyForHooksProvider, hooksProvider, __proxyForHooksProviderWorker);
 
         function __proxyForHooksProviderWorker(hooksProvider: any) {
@@ -80,7 +84,8 @@ export class ProxyPlugin implements WebpackPlugin {
                 get: (target, property) => {
                     if (property === 'hooks') {
                         const hooks = target[property];
-                        return _proxyForHooks(hooks, [hooksProvider.constructor.name, property]);
+                        const ret = that._proxyForHooks(hooks, [hooksProvider.constructor.name, property]);
+                        return ret;
                     }
                 },
             });
@@ -90,7 +95,7 @@ export class ProxyPlugin implements WebpackPlugin {
     private cachedProxyForHooks = new Map();
 
     private _proxyForHooks(hooks: any, propertyTrackPaths: PropertyTrackPaths) {
-        const { _proxyForHook } = this;
+        const that = this;
         return getOrCreate(this.cachedProxyForHooks, hooks, _proxyForHooksWorker);
 
         function _proxyForHooksWorker(hooks: any) {
@@ -99,7 +104,7 @@ export class ProxyPlugin implements WebpackPlugin {
                     assert(!isSymbolObject(property), 'Getting Symbol property from "hooks", it should never happen, right?');
                     const hook = target[property];
                     // TODO: check `hook` inheritage from `Tapable`
-                    return _proxyForHook(hook, [...propertyTrackPaths, property]);
+                    return that._proxyForHook(hook, [...propertyTrackPaths, property]);
                 },
             });
         }
@@ -108,31 +113,33 @@ export class ProxyPlugin implements WebpackPlugin {
     private cachedProxyForHook = new Map();
 
     private _proxyForHook(hook: any, propertyTrackPaths: PropertyTrackPaths) {
-        return getOrCreate(this.cachedProxyForHook, hook, this._proxyForHookWorker);
+        const that = this;
+        return getOrCreate(this.cachedProxyForHook, hook, _proxyForHookWorker);
+
+        function _proxyForHookWorker(hook: any) {
+            // const { knownTapMethodNames, _proxyForTap, _proxyForTapAsync, _proxyForTapPromise } = this;
+            return new Proxy(hook, {
+                get: function (target, property) {
+                    assert(!isSymbolObject(property), 'Getting Symbol property from "hook", it should never happen, right?');
+                    assert(that.knownTapMethodNames.includes(property));
+                    const tapMethod = target[property];
+                    switch (property) {
+                        case 'tap':
+                            return that._proxyForTap(tapMethod);
+                        case 'tapAsync':
+                            return that._proxyForTapAsync(tapMethod);
+                        case 'tapPromise':
+                            return that._proxyForTapPromise(tapMethod);
+                        default:
+                            fail(`${property} is called on a hook, but we could not handle it now.`);
+                    }
+                },
+            });
+        }
     }
 
     private knownTapMethodNames = ['tap', 'tapAsync', 'tapPromise'];
 
-    private _proxyForHookWorker(hook: any) {
-        const { knownTapMethodNames, _proxyForTap, _proxyForTapAsync, _proxyForTapPromise } = this;
-        return new Proxy(hook, {
-            get: function (target, property) {
-                assert(!isSymbolObject(property), 'Getting Symbol property from "hook", it should never happen, right?');
-                assert(knownTapMethodNames.includes(property));
-                const tapMethod = target[property];
-                switch (property) {
-                    case 'tap':
-                        return _proxyForTap(tapMethod);
-                    case 'tapAsync':
-                        return _proxyForTapAsync(tapMethod);
-                    case 'tapPromise':
-                        return _proxyForTapPromise(tapMethod);
-                    default:
-                        fail(`${property} is called on a hook, but we could not handle it now.`);
-                }
-            },
-        });
-    }
 
     private cachedProxyForTap = new Map();
 
@@ -195,14 +202,18 @@ function wrapTapCallback(this: ProxyPlugin, tapCallback: TapCallback): TapCallba
     return function (...args: any[]) {
         args.forEach(proxyForHookProviderCandidates);
         const uuid = randomUUID();
-        analyzer.collectInfo({
+        analyzer.collectPluginInfo({
+            kind: AnalyzeInfoKind.plugin,
+            eventType: PluginEventType.start,
             pluginName,
             time: performance.now(),
             tapCallId: uuid,
             tapType: TapType.normal,
         });
         const origionalReturn = tapCallback(...args);
-        analyzer.collectInfo({
+        analyzer.collectPluginInfo({
+            kind: AnalyzeInfoKind.plugin,
+            eventType: PluginEventType.end,
             pluginName,
             time: performance.now(),
             tapCallId: uuid,
@@ -219,14 +230,18 @@ function wrapTapAsyncCallback(this: ProxyPlugin, tapCallback: TapAsyncCallback):
         args.forEach(proxyForHookProviderCandidates);
         const callback = args[args.length - 1];
         const uuid = randomUUID();
-        analyzer.collectInfo({
+        analyzer.collectPluginInfo({
+            kind: AnalyzeInfoKind.plugin,
+            eventType: PluginEventType.start,
             pluginName,
             time: performance.now(),
             tapCallId: uuid,
             tapType: TapType.async,
         });
         const wrappedCallback = () => {
-            analyzer.collectInfo({
+            analyzer.collectPluginInfo({
+                kind: AnalyzeInfoKind.plugin,
+                eventType: PluginEventType.end,
                 pluginName: '',
                 time: performance.now(),
                 tapCallId: uuid,
@@ -245,7 +260,9 @@ function wrapTapPromiseCallback(this: ProxyPlugin, tapCallback: TapPromiseCallba
     return function (...args: any[]) {
         args.forEach(proxyForHookProviderCandidates);
         const uuid = randomUUID();
-        analyzer.collectInfo({
+        analyzer.collectPluginInfo({
+            eventType: PluginEventType.start,
+            kind: AnalyzeInfoKind.plugin,
             pluginName,
             time: performance.now(),
             tapCallId: uuid,
@@ -253,7 +270,9 @@ function wrapTapPromiseCallback(this: ProxyPlugin, tapCallback: TapPromiseCallba
         });
         const originPromise = tapCallback(...args);
         originPromise.then(() => {
-            analyzer.collectInfo({
+            analyzer.collectPluginInfo({
+                eventType: PluginEventType.end,
+                kind: AnalyzeInfoKind.plugin,
                 pluginName: '',
                 time: performance.now(),
                 tapCallId: uuid,

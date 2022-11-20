@@ -1,9 +1,9 @@
-import type { Compiler, Configuration, ModuleOptions,  RuleSetRule } from 'webpack';
+import type { Compiler, Configuration, ModuleOptions, RuleSetRule } from 'webpack';
 import { NormalModule } from 'webpack';
-import { analyzer } from './analyzer';
+import { AnalyzeInfoKind, analyzer, WebpackMetaEventType } from './analyzer';
 import { ProxyPlugin } from './ProxyPlugin';
 import { normalizeRules } from './ruleHelper';
-import { assert, fail } from './utils';
+import { assert, fail, now } from './utils';
 
 export declare class WebpackPlugin {
     /**
@@ -29,6 +29,24 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
             NormalModule.getCompilationHooks(compilation).beforeLoaders.tap(TimeAnalyticsPlugin.name, (loaders, module, obj) => {
                 // debugger;
             });
+        });
+
+        compiler.hooks.compile.tap(TimeAnalyticsPlugin.name, () => {
+            analyzer.collectWebpackInfo({
+                hookType: WebpackMetaEventType.Compiler_compile,
+                kind: AnalyzeInfoKind.webpackMeta,
+                time: now(),
+            });
+        });
+
+        compiler.hooks.done.tap(TimeAnalyticsPlugin.name, () => {
+            analyzer.collectWebpackInfo({
+                hookType: WebpackMetaEventType.Compiler_done,
+                kind: AnalyzeInfoKind.webpackMeta,
+                time: now(),
+            });
+
+            debugger;
         });
     }
 

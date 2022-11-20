@@ -6,6 +6,7 @@ import { fail } from './utils';
 export enum AnalyzeInfoKind {
     loader,
     plugin,
+    webpackMeta,
 }
 
 export enum LoaderType {
@@ -24,7 +25,7 @@ export interface LoaderEventInfo {
     /**
      * the absolute path to the loader
      */
-    path: string;
+    loaderPath: string;
     time: number;
     /**
      * source file that the loader is handling
@@ -71,6 +72,25 @@ export interface PluginEventInfo {
     eventType: PluginEventType;
 }
 
+/**
+ * The exact one hook of webpack
+ * 
+ * Name format is `${hooks container name}_${hook name}`
+ */
+export enum WebpackMetaEventType {
+    Compiler_compile,
+    Compiler_done,
+}
+
+/**
+ * The aim is to record timestap of some event which only runs for once
+ */
+export interface WebpackMetaEventInfo {
+    kind: AnalyzeInfoKind.webpackMeta;
+    time: number;
+    hookType: WebpackMetaEventType,
+}
+
 export type AnalyzeEventInfo = LoaderEventInfo | PluginEventInfo;
 
 class WebpackTimeAnalyzer {
@@ -83,11 +103,24 @@ class WebpackTimeAnalyzer {
         this._isInitilized = true;
     }
 
-    collectLoaderInfo(loaderInfo: LoaderEventInfo) { }
-    
-    collectPluginInfo(pluginInfo: PluginEventInfo) { }
 
-    collectInfo(analyzeInfo: AnalyzeEventInfo) { }
+    loaderInfos: LoaderEventInfo[] = [];
+
+    collectLoaderInfo(loaderInfo: LoaderEventInfo) {
+        this.loaderInfos.push(loaderInfo);
+    }
+
+    pluginInfos: PluginEventInfo[] = [];
+
+    collectPluginInfo(pluginInfo: PluginEventInfo) {
+        this.pluginInfos.push(pluginInfo);
+    }
+
+    metaInfo: WebpackMetaEventInfo[] = [];
+
+    collectWebpackInfo(metaInfo: WebpackMetaEventInfo) {
+        this.metaInfo.push(metaInfo);
+    }
 }
 
 export const analyzer = new WebpackTimeAnalyzer();
