@@ -50,7 +50,7 @@ export class ProxyPlugin implements WebpackPlugin {
     apply(compiler: Compiler): void {
         const proxiedCompiler =
             compiler;
-            // this._proxyForHookProviderCandidates(compiler);
+        // this._proxyForHookProviderCandidates(compiler);
         this._proxiedPlugin.apply(proxiedCompiler);
     }
 
@@ -83,8 +83,11 @@ export class ProxyPlugin implements WebpackPlugin {
             return new Proxy(hooksProvider, {
                 get: (target, property) => {
                     if (property === 'hooks') {
-                        const hooks = target[property];
-                        const ret = that._proxyForHooks(hooks, [hooksProvider.constructor.name, property]);
+                        const originHooks = target[property];
+                        assert(Object.isFrozen(originHooks), 'webpack frozens all `hooks` by defualt');
+                        assert(originHooks.constructor.name === 'Object', '`Hooks` should just be plain object');
+                        const unfrozenHooks = { ...originHooks };
+                        const ret = that._proxyForHooks(unfrozenHooks, [hooksProvider.constructor.name, property]);
                         return ret;
                     }
                 },
