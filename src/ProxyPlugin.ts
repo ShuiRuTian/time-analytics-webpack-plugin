@@ -120,10 +120,10 @@ export class ProxyPlugin implements WebpackPlugin {
         function _proxyForHookWorker(hook: any) {
             return new Proxy(hook, {
                 get: function (target, property) {
-                    // `_tap` is the implement detail that is used internally
-                    // handle every thing explicitly to take full control of it
-                    if (property === '_tap') return target[property];
                     assert(!isSymbolObject(property), 'Getting Symbol property from "hook", it should never happen, right?');
+                    // `_XXX` is the implement detail that is used internally
+                    // it might be a bad idea, but we want to handle every thing explicitly to take full control of it
+                    if (property.startsWith('_')) return target[property];
                     assert(that.knownTapMethodNames.includes(property));
                     const tapMethod = target[property];
                     switch (property) {
