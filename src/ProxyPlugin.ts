@@ -48,9 +48,7 @@ export class ProxyPlugin implements WebpackPlugin {
     }
 
     apply(compiler: Compiler): void {
-        const proxiedCompiler =
-            compiler;
-        // this._proxyForHookProviderCandidates(compiler);
+        const proxiedCompiler = this._proxyForHookProviderCandidates(compiler);
         this._proxiedPlugin.apply(proxiedCompiler);
     }
 
@@ -120,9 +118,11 @@ export class ProxyPlugin implements WebpackPlugin {
         return getOrCreate(this.cachedProxyForHook, hook, _proxyForHookWorker);
 
         function _proxyForHookWorker(hook: any) {
-            // const { knownTapMethodNames, _proxyForTap, _proxyForTapAsync, _proxyForTapPromise } = this;
             return new Proxy(hook, {
                 get: function (target, property) {
+                    // `_tap` is the implement detail that is used internally
+                    // handle every thing explicitly to take full control of it
+                    if (property === '_tap') return target[property];
                     assert(!isSymbolObject(property), 'Getting Symbol property from "hook", it should never happen, right?');
                     assert(that.knownTapMethodNames.includes(property));
                     const tapMethod = target[property];
@@ -151,15 +151,15 @@ export class ProxyPlugin implements WebpackPlugin {
     private cachedProxyForTapPromise = new Map();
 
     private _proxyForTap(tap: Tap) {
-        return getOrCreate(this.cachedProxyForTap, tap, this._proxyForTapWorker);
+        return getOrCreate(this.cachedProxyForTap, tap, this._proxyForTapWorker.bind(this));
     }
 
     private _proxyForTapAsync(tap: Tap) {
-        return getOrCreate(this.cachedProxyForTapAsync, tap, this._proxyForTapAsyncWorker);
+        return getOrCreate(this.cachedProxyForTapAsync, tap, this._proxyForTapAsyncWorker.bind(this));
     }
 
     private _proxyForTapPromise(tap: Tap) {
-        return getOrCreate(this.cachedProxyForTapPromise, tap, this._proxyForTapPromiseWorker);
+        return getOrCreate(this.cachedProxyForTapPromise, tap, this._proxyForTapPromiseWorker.bind(this));
     }
 
     private _proxyForTapWorker(tap: Tap) {
