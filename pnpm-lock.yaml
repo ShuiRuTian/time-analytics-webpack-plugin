@@ -26,6 +26,7 @@ importers:
     specifiers:
       '@tsconfig/recommended': ^1.0.1
       '@types/node': ^16.11.56
+      '@types/ramda': ^0.28.20
       '@types/tapable': ^2.2.2
       '@typescript-eslint/eslint-plugin': ^5.35.1
       '@typescript-eslint/parser': ^5.35.1
@@ -33,8 +34,11 @@ importers:
       eslint: ^8.23.0
       eslint-config-airbnb-typescript: ^17.0.0
       eslint-plugin-import: ^2.26.0
+      ramda: ^0.28.0
     dependencies:
+      '@types/ramda': registry.npmmirror.com/@types/ramda/0.28.20
       chalk: registry.npmmirror.com/chalk/4.1.2
+      ramda: registry.npmmirror.com/ramda/0.28.0
     devDependencies:
       '@tsconfig/recommended': 1.0.1
       '@types/node': 16.18.3
@@ -821,8 +825,8 @@ packages:
       eslint: ^7.32.0 || ^8.2.0
       eslint-plugin-import: ^2.25.3
     dependencies:
-      '@typescript-eslint/eslint-plugin': 5.43.0_yy4vf4gcvxiubmg7fqa55dqe2i
-      '@typescript-eslint/parser': 5.43.0_rmayb2veg2btbq6mbmnyivgasy
+      '@typescript-eslint/eslint-plugin': 5.43.0_wbsj7pk5g7hogwvhsif6xntns4
+      '@typescript-eslint/parser': 5.43.0_eslint@8.27.0
       eslint: 8.27.0
       eslint-config-airbnb-base: 15.0.0_dcpv4nbdr5ks2h5677xdltrk6e
       eslint-plugin-import: 2.26.0_wbsj7pk5g7hogwvhsif6xntns4
@@ -858,7 +862,7 @@ packages:
       eslint-import-resolver-webpack:
         optional: true
     dependencies:
-      '@typescript-eslint/parser': 5.43.0_rmayb2veg2btbq6mbmnyivgasy
+      '@typescript-eslint/parser': 5.43.0_eslint@8.27.0
       debug: 3.2.7
       eslint: 8.27.0
       eslint-import-resolver-node: 0.3.6
@@ -876,7 +880,7 @@ packages:
       '@typescript-eslint/parser':
         optional: true
     dependencies:
-      '@typescript-eslint/parser': 5.43.0_rmayb2veg2btbq6mbmnyivgasy
+      '@typescript-eslint/parser': 5.43.0_eslint@8.27.0
       array-includes: 3.1.6
       array.prototype.flat: 1.3.1
       debug: 2.6.9
@@ -2173,6 +2177,14 @@ packages:
     version: 16.18.3
     dev: true
 
+  registry.npmmirror.com/@types/ramda/0.28.20:
+    resolution: {integrity: sha512-MeUhzGSXQTRsY19JGn5LIBTLxVEnyF6HDNr08KSJqybsm4DlfLIgK1jBHjhpiSyk252tXYmp+UOe0UFg0UiFsA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@types/ramda/-/ramda-0.28.20.tgz}
+    name: '@types/ramda'
+    version: 0.28.20
+    dependencies:
+      ts-toolbelt: registry.npmmirror.com/ts-toolbelt/6.15.5
+    dev: false
+
   registry.npmmirror.com/@webassemblyjs/ast/1.11.1:
     resolution: {integrity: sha512-ukBh14qFLjxTQNTXocdyksN5QdM28S1CxHt2rdskFyL+xFV7VremuBLVbmCePj+URalXBENx/9Lm7lnhihtCSw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@webassemblyjs/ast/-/ast-1.11.1.tgz}
     name: '@webassemblyjs/ast'
@@ -2616,6 +2628,12 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
+  registry.npmmirror.com/ramda/0.28.0:
+    resolution: {integrity: sha512-9QnLuG/kPVgWvMQ4aODhsBUFKOUmnbUnsSXACv+NCQZcHbeb+v8Lodp8OVxtRULN1/xOyYLLaL6npE6dMq5QTA==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/ramda/-/ramda-0.28.0.tgz}
+    name: ramda
+    version: 0.28.0
+    dev: false
+
   registry.npmmirror.com/randombytes/2.1.0:
     resolution: {integrity: sha512-vYl3iOX+4CKUWuxGi9Ukhie6fsqXqS9FE2Zaic4tNFD2N2QQaXOMFbuKK4QmDHC0JO6B1Zp41J0LpT0oR68amQ==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/randombytes/-/randombytes-2.1.0.tgz}
     name: randombytes
@@ -2728,6 +2746,12 @@ packages:
       commander: registry.npmmirror.com/commander/2.20.3
       source-map-support: registry.npmmirror.com/source-map-support/0.5.21
     dev: true
+
+  registry.npmmirror.com/ts-toolbelt/6.15.5:
+    resolution: {integrity: sha512-FZIXf1ksVyLcfr7M317jbB67XFJhOO1YqdTcuGaq9q5jLUoTikukZ+98TPjKiP2jC5CgmYdWWYs0s2nLSU0/1A==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/ts-toolbelt/-/ts-toolbelt-6.15.5.tgz}
+    name: ts-toolbelt
+    version: 6.15.5
+    dev: false
 
   registry.npmmirror.com/update-browserslist-db/1.0.10_browserslist@4.21.4:
     resolution: {integrity: sha512-OztqDenkfFkbSG+tRxBeAnCVPckDBcvibKd35yDONx6OU8N7sqgwc7rCbkJ/WcYtVRZ4ba68d6byhC21GFh7sQ==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/update-browserslist-db/-/update-browserslist-db-1.0.10.tgz}
