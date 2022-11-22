@@ -1,5 +1,5 @@
 {
-  "name": "webpack-analytics-plugin",
+  "name": "time-analytics-webpack-plugin",
   "version": "0.0.1",
   "description": "",
   "main": "index.ts",
@@ -16,6 +16,7 @@
     "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-plugin-import": "^2.26.0",
     "typescript": "^4.7.0",
-    "webpack": "^5.75.0"
+    "webpack": "^5.75.0",
+    "ts-node": "^10.9.1"
   }
 }

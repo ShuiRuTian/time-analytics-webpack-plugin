@@ -67,7 +67,7 @@ function wrapConfigurationCore(this: TimeAnalyticsPlugin, config: Configuration)
         config.plugins = config.plugins.map(wrapPluginCore);
         config.plugins = [this, ...config.plugins];
     }
-    if (config.optimization && config.optimization.minimizer) {
+    if (config.optimization?.minimizer) {
         config.optimization.minimizer = config.optimization.minimizer
             .map(wrapMinimizer);
     }

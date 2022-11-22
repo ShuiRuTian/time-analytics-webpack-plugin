@@ -1,8 +1,10 @@
 const path = require("path");
 const webpack = require("webpack");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = {
-  mode: "development",
+  mode: "production",
   context: __dirname,
   entry: {
     bundle: "./app.js",
@@ -11,6 +13,7 @@ module.exports = {
     path: path.join(__dirname, "./dist")
   },
   plugins: [
+    new MiniCssExtractPlugin(),
     new webpack.DefinePlugin({ FOO: "'BAR'" })
   ],
   module: {
@@ -21,8 +24,14 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ["style-loader", "css-loader"]
+        use: [MiniCssExtractPlugin.loader, /* "style-loader", */ "css-loader"]
       }
     ]
-  }
+  },
+  optimization: {
+    minimizer: [
+      // TerserPlugin need some properties of compiler.webpack function
+      new TerserPlugin({ parallel: true }),
+    ],
+  },
 };

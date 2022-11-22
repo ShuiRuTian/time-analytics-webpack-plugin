@@ -10,12 +10,14 @@ importers:
       '@babel/core': ^7.0.0
       babel-loader: ^8.1.0
       css-loader: ^5.0.2
+      mini-css-extract-plugin: ^2.7.0
       style-loader: ^2.0.0
-      terser-webpack-plugin: ^5.1.1
+      terser-webpack-plugin: ^5.3.6
     devDependencies:
       '@babel/core': 7.20.2
       babel-loader: 8.3.0_@babel+core@7.20.2
       css-loader: 5.2.7
+      mini-css-extract-plugin: 2.7.0
       style-loader: 2.0.0
       terser-webpack-plugin: 5.3.6
 
@@ -281,6 +283,15 @@ packages:
     hasBin: true
     dev: true
 
+  /ajv-formats/2.1.1:
+    resolution: {integrity: sha1-bmaUAGWet0lzu/LjMycYCgmWtSA=}
+    peerDependenciesMeta:
+      ajv:
+        optional: true
+    dependencies:
+      ajv: 8.11.2
+    dev: true
+
   /ajv-keywords/3.5.2_ajv@6.12.6:
     resolution: {integrity: sha1-MfKdpatuANHC0yms97WSlhTVAU0=}
     peerDependencies:
@@ -289,12 +300,30 @@ packages:
       ajv: 6.12.6
     dev: true
 
+  /ajv-keywords/5.1.0_ajv@8.11.2:
+    resolution: {integrity: sha1-adTThaRzPNvqtElkoRcKiPh/DhY=}
+    peerDependencies:
+      ajv: ^8.8.2
+    dependencies:
+      ajv: 8.11.2
+      fast-deep-equal: 3.1.3
+    dev: true
+
   /ajv/6.12.6:
     resolution: {integrity: sha1-uvWmLoArB9l3A0WG+MO69a3ybfQ=}
     dependencies:
       fast-deep-equal: 3.1.3
       fast-json-stable-stringify: 2.1.0
       json-schema-traverse: 0.4.1
+      uri-js: 4.4.1
+    dev: true
+
+  /ajv/8.11.2:
+    resolution: {integrity: sha1-rssgtQYHrPJWm2OCFntlqWAIu3g=}
+    dependencies:
+      fast-deep-equal: 3.1.3
+      json-schema-traverse: 1.0.0
+      require-from-string: 2.0.2
       uri-js: 4.4.1
     dev: true
 
@@ -505,6 +534,10 @@ packages:
     resolution: {integrity: sha1-afaofZUTq4u4/mO9sJecRI5oRmA=}
     dev: true
 
+  /json-schema-traverse/1.0.0:
+    resolution: {integrity: sha1-rnvLNlard6c7pcSb9lTzjmtoYOI=}
+    dev: true
+
   /json5/2.2.1:
     resolution: {integrity: sha1-ZV1Q7R5vla0aPKq6vSsO/aELOVw=}
     engines: {node: '>=6'}
@@ -543,6 +576,15 @@ packages:
 
   /merge-stream/2.0.0:
     resolution: {integrity: sha1-UoI2KaFN0AyXcPtq1H3GMQ8sH2A=}
+    dev: true
+
+  /mini-css-extract-plugin/2.7.0:
+    resolution: {integrity: sha1-19m6DFtZbRVeNuKxdAgvx/AQ3WQ=}
+    engines: {node: '>= 12.13.0'}
+    peerDependencies:
+      webpack: ^5.0.0
+    dependencies:
+      schema-utils: 4.0.0
     dev: true
 
   /ms/2.1.2:
@@ -667,6 +709,11 @@ packages:
       safe-buffer: 5.2.1
     dev: true
 
+  /require-from-string/2.0.2:
+    resolution: {integrity: sha1-iaf92TgmEmcxjq/hT5wy5ZjDaQk=}
+    engines: {node: '>=0.10.0'}
+    dev: true
+
   /safe-buffer/5.2.1:
     resolution: {integrity: sha1-Hq+fqb2x/dTsdfWPnNtOa3gn7sY=}
     dev: true
@@ -687,6 +734,16 @@ packages:
       '@types/json-schema': 7.0.11
       ajv: 6.12.6
       ajv-keywords: 3.5.2_ajv@6.12.6
+    dev: true
+
+  /schema-utils/4.0.0:
+    resolution: {integrity: sha1-YDMenjrnjsXRY1PEZ8NLOgodPfc=}
+    engines: {node: '>= 12.13.0'}
+    dependencies:
+      '@types/json-schema': 7.0.11
+      ajv: 8.11.2
+      ajv-formats: 2.1.1
+      ajv-keywords: 5.1.0_ajv@8.11.2
     dev: true
 
   /semver/6.3.0:

@@ -88,6 +88,7 @@ export class ProxyPlugin implements WebpackPlugin {
                         const ret = that._proxyForHooks(unfrozenHooks, [hooksProvider.constructor.name, property]);
                         return ret;
                     }
+                    return target[property];
                 },
             });
         }

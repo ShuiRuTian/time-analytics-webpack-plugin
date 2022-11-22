@@ -1,9 +1,7 @@
 import chalk, { Chalk } from 'chalk';
-import { curry, groupBy, isNil, not, path, pipe, prop, reduceWhile } from 'ramda';
+import { curry, groupBy, path, prop } from 'ramda';
 import { PACKAGE_NAME } from './const';
 import { assert, fail } from './utils';
-
-
 
 export enum AnalyzeInfoKind {
     loader,

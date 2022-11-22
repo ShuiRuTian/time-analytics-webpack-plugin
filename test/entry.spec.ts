@@ -60,9 +60,9 @@ describe('Time Analyze Plugin', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const webpackConfig = require(webpackConfigurationPath);
 
-    const finalWebpackConfig = 
-    // webpackConfig;
-    TimeAnalyticsPlugin.wrap(webpackConfig);
+    const finalWebpackConfig =
+      // webpackConfig;
+      TimeAnalyticsPlugin.wrap(webpackConfig);
 
     it('the example test case', async () => {
       return new Promise((resolve, reject) => {

@@ -15,12 +15,7 @@
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",
     "@types/node": "^16.11.56",
-    "@types/tapable": "^2.2.2",
-    "@typescript-eslint/eslint-plugin": "^5.35.1",
-    "@typescript-eslint/parser": "^5.35.1",
-    "eslint": "^8.23.0",
-    "eslint-config-airbnb-typescript": "^17.0.0",
-    "eslint-plugin-import": "^2.26.0"
+    "@types/tapable": "^2.2.2"
   },
   "dependencies": {
     "@types/ramda": "^0.28.20",
