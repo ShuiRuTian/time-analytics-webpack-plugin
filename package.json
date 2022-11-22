@@ -1,12 +1,5 @@
 {
-  "name": "time-analytics-webpack-plugin",
-  "version": "0.0.1",
-  "description": "",
-  "main": "index.ts",
-  "scripts": {
-  },
-  "author": "",
-  "license": "ISC",
+  "private": true,
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",
     "@typescript-eslint/eslint-plugin": "^5.35.1",

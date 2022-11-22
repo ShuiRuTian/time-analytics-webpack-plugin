@@ -1,14 +1,14 @@
 {
   "name": "time-analytics-webpack-plugin",
-  "version": "0.0.1",
-  "description": "",
+  "version": "0.1.0",
+  "description": "analytize the time of each part of webpack",
   "main": "./dist/index.js",
   "types": "./types",
   "scripts": {
     "build": "tsc -p ./tsconfig.json"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Song Gao",
+  "license": "BSD",
   "peerDependencies": {
     "webpack": "^5"
   },
