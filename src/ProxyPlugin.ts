@@ -145,7 +145,9 @@ export class ProxyPlugin implements WebpackPlugin {
             const isImplementationDetail = property.startsWith('_');
             // if the property is not a function, we do not want to take over it.
             const isFunction = typeof target[property] === 'function';
-            return isImplementationDetail || !isFunction;
+            // intercept is useless for us.
+            const isIntercept = property === 'intercept';
+            return isImplementationDetail || !isFunction || isIntercept;
         }
     }
 
@@ -185,7 +187,7 @@ export class ProxyPlugin implements WebpackPlugin {
     private _proxyForTapAsyncWorker(tap: TapAsync) {
         return new Proxy(tap, {
             apply: (target, thisArg, argArray) => {
-                assert(argArray.length == 2, 'tap should receive only two parameters');
+                assert(argArray.length == 2, 'tapAsync should receive only two parameters');
                 const options = argArray[0];
                 const originFn = argArray[1];
                 const wrappedFn = wrapTapAsyncCallback.call(this, originFn);
@@ -197,7 +199,7 @@ export class ProxyPlugin implements WebpackPlugin {
     private _proxyForTapPromiseWorker(tap: TapPromise) {
         return new Proxy(tap, {
             apply: (target, thisArg, argArray) => {
-                assert(argArray.length == 2, 'tap should receive only two parameters');
+                assert(argArray.length == 2, 'tapPromise should receive only two parameters');
                 const options = argArray[0];
                 const originFn = argArray[1];
                 const wrappedFn = wrapTapPromiseCallback.call(this, originFn);
@@ -211,7 +213,7 @@ function wrapTapCallback(this: ProxyPlugin, tapCallback: TapCallback): TapCallba
     const pluginName = this.proxiedPluginName;
     const proxyForHookProviderCandidates = this._proxyForHookProviderCandidates.bind(this);
     return function (...args: any[]) {
-        args.forEach(proxyForHookProviderCandidates);
+        const wrapedArgs = args.map(proxyForHookProviderCandidates);
         const uuid = randomUUID();
         analyzer.collectPluginInfo({
             kind: AnalyzeInfoKind.plugin,
@@ -221,7 +223,7 @@ function wrapTapCallback(this: ProxyPlugin, tapCallback: TapCallback): TapCallba
             tapCallId: uuid,
             tapType: TapType.normal,
         });
-        const origionalReturn = tapCallback(...args);
+        const origionalReturn = tapCallback(...wrapedArgs);
         analyzer.collectPluginInfo({
             kind: AnalyzeInfoKind.plugin,
             eventType: PluginEventType.end,
@@ -238,8 +240,9 @@ function wrapTapAsyncCallback(this: ProxyPlugin, tapCallback: TapAsyncCallback):
     const pluginName = this.proxiedPluginName;
     const proxyForHookProviderCandidates = this._proxyForHookProviderCandidates.bind(this);
     return function (...args: any[]) {
-        args.forEach(proxyForHookProviderCandidates);
         const callback = args[args.length - 1];
+        const noncallbackArgs = args.slice(0, -1);
+        const wrapedNoncallbackArgs = noncallbackArgs.map(proxyForHookProviderCandidates);
         const uuid = randomUUID();
         analyzer.collectPluginInfo({
             kind: AnalyzeInfoKind.plugin,
@@ -260,7 +263,7 @@ function wrapTapAsyncCallback(this: ProxyPlugin, tapCallback: TapAsyncCallback):
             });
             callback();
         };
-        const origionalReturn = tapCallback(...args, wrappedCallback);
+        const origionalReturn = tapCallback(...wrapedNoncallbackArgs, wrappedCallback);
         return origionalReturn;
     };
 }
@@ -269,7 +272,7 @@ function wrapTapPromiseCallback(this: ProxyPlugin, tapCallback: TapPromiseCallba
     const pluginName = this.proxiedPluginName;
     const proxyForHookProviderCandidates = this._proxyForHookProviderCandidates.bind(this);
     return function (...args: any[]) {
-        args.forEach(proxyForHookProviderCandidates);
+        const wrapedArgs = args.map(proxyForHookProviderCandidates);
         const uuid = randomUUID();
         analyzer.collectPluginInfo({
             eventType: PluginEventType.start,
@@ -279,7 +282,7 @@ function wrapTapPromiseCallback(this: ProxyPlugin, tapCallback: TapPromiseCallba
             tapCallId: uuid,
             tapType: TapType.promise,
         });
-        const originPromise = tapCallback(...args);
+        const originPromise = tapCallback(...wrapedArgs);
         originPromise.then(() => {
             analyzer.collectPluginInfo({
                 eventType: PluginEventType.end,
