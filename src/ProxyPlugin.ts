@@ -3,12 +3,12 @@
 /* eslint-disable @typescript-eslint/naming-convention */ // use _ as private field name
 import { randomUUID } from 'crypto';
 import { performance } from 'perf_hooks';
-import type { AsyncHook, Hook } from 'tapable';
+import type { AsyncHook, Hook, HookMap } from 'tapable';
 import { isSymbolObject } from 'util/types';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { AnalyzeInfoKind, analyzer, PluginEventType, TapType } from './analyzer';
 import { WebpackPlugin } from './TimeAnalyticsPlugin';
-import { assert, fail } from './utils';
+import { assert, fail, isConstructorNameInPrototypeChain } from './utils';
 
 const injectedPlugins = new Set<WebpackPluginInstance>();
 const injectedPluginNames = new Set<string>();
@@ -104,9 +104,51 @@ export class ProxyPlugin implements WebpackPlugin {
             return new Proxy(hooks, {
                 get: function (target, property) {
                     assert(!isSymbolObject(property), 'Getting Symbol property from "hooks", it should never happen, right?');
-                    const hook = target[property];
-                    // TODO: check `hook` inheritage from `Tapable`
-                    return that._proxyForHook(hook, [...propertyTrackPaths, property]);
+                    const method = target[property];
+                    switch (true) {
+                        case isHook(method):
+                            return that._proxyForHook(method, [...propertyTrackPaths, property]);
+                        case isHookMap(method):
+                            return that._proxyForHookMap(method);
+                        default:
+                            fail('unhandled property from hook');
+                    }
+                },
+            });
+        }
+    }
+
+    private cachedProxyForHookMap = new Map();
+
+    private _proxyForHookMap(hookMap: HookMap<any>) {
+        const that = this;
+        return getOrCreate(this.cachedProxyForHookMap, hookMap, _proxyForHookMapWorker);
+
+        function _proxyForHookMapWorker(hookMap: HookMap<any>): any {
+            return new Proxy(hookMap, {
+                get: function (target, property) {
+                    const origin = (target as any)[property];
+                    if (property === 'for') {
+                        return that._proxyForHookMapFor(origin);
+                    }
+                    return origin;
+                },
+            });
+        }
+    }
+
+    private cachedProxyForHookMapFor = new Map();
+
+    private _proxyForHookMapFor(hookMapFor: HookMap<any>['for']) {
+        const that = this;
+        return getOrCreate(this.cachedProxyForHookMapFor, hookMapFor, _proxyForHookMapForWorker);
+
+        function _proxyForHookMapForWorker(hookMapFor: HookMap<any>['for']) {
+            return new Proxy(hookMapFor, {
+                apply: (target, thisArg, argArray) => {
+                    const originHook = (target as any).apply(thisArg, argArray);
+                    assert(isHook(originHook));
+                    return that._proxyForHook(originHook, []); // FIXME: use the real call path rather than the array
                 },
             });
         }
@@ -283,17 +325,17 @@ function wrapTapPromiseCallback(this: ProxyPlugin, tapCallback: TapPromiseCallba
             tapType: TapType.promise,
         });
         const originPromise = tapCallback(...wrapedArgs);
-        originPromise.then(() => {
+        const ret = originPromise.then(() => {
             analyzer.collectPluginInfo({
                 eventType: PluginEventType.end,
                 kind: AnalyzeInfoKind.plugin,
-                pluginName: '',
+                pluginName,
                 time: performance.now(),
                 tapCallId: uuid,
                 tapType: TapType.promise,
             });
         });
-        return originPromise;
+        return ret;
     };
 }
 
@@ -316,4 +358,12 @@ function getOrCreate<K, V>(cache: Map<K, V>, key: K, factory: (k: K) => V) {
         cache.set(key, proxyForHooks);
     }
     return cache.get(key)!;
+}
+
+function isHook(obj: any) {
+    return isConstructorNameInPrototypeChain('Hook', obj);
+}
+
+function isHookMap(obj: any) {
+    return isConstructorNameInPrototypeChain('HookMap', obj);
 }

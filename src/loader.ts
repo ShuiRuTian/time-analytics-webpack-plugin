@@ -134,7 +134,7 @@ loader.pitch = function (this, q, w, e) {
                                 time: now(),
                             });
                             const asyncResult = arguments[1];
-                            console.log(`Origin loader: ${tmp}'s ${loaderTypeText} loader, async result is \n ${chalk.red(asyncResult)} `);
+                            // console.log(`Origin loader: ${tmp}'s ${loaderTypeText} loader, async result is \n ${chalk.red(asyncResult)} `);
                             originCallback.apply(this, arguments);
                         };
                     },

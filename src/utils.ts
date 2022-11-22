@@ -38,3 +38,18 @@ export function assertNever(member: never, message = 'Assert never:'): never {
 export function now() {
     return performance.now();
 }
+
+/**
+ * like `instanceof`, but not accurate. Judgement by the name of constructor.
+ */
+// webpack does not export tapable, so there is no way to know whether a class is hook or not easily.
+export function isConstructorNameInPrototypeChain(name: string, obj: any) {
+    let curPropto = obj;
+    while (curPropto) {
+        if (curPropto.constructor.name === name) {
+            return true;
+        }
+        curPropto = Reflect.getPrototypeOf(curPropto);
+    }
+    return false;
+}
