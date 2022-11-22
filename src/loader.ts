@@ -74,7 +74,7 @@ function getLoaderName(path: string) {
     return loaderName;
 }
 
-const normalLoaderID = '__sg_is_origin_Loader';
+const normalLoaderID = '__is_origin_Loader';
 
 function isNormalLoaderFunc(loaderFunc: LoaderDefinitionFunction | PitchLoaderDefinitionFunction): loaderFunc is LoaderDefinitionFunction {
     return !!(loaderFunc as any)[normalLoaderID];

@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "test": "jest"
   },
   "author": "",
   "license": "ISC",

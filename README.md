@@ -11,7 +11,7 @@ speed-measure-webpack-plugin is written in js, some surface is handled roughly.
 speed-measure-webpack-plugin does not do many check, and this plugin is strict, we check many situations and if it's not handled, we just throw an error rather than behave as work successfully.
 
 ## How does it work?
-To measure time, we must know when the loader starts and ends.
+To measure time, we must know when the loader/plugins starts and ends.
 
 However, this is tricky, because when writing a loader, you do not want others influence your code. So how could we take over other's loader and plugin?
 

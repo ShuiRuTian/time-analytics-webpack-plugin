@@ -187,6 +187,7 @@ function outputMetaInfo(data: WebpackMetaEventInfo[]) {
 
 function outputPluginInfos(data: PluginEventInfo[]) {
     assert(isSortBy(['time'], data), 'plugin event info should be sorted by time.');
+    console.log(`${chalk.blue(chalk.bold('Plugins'))}`);
     let allPluginTime = 0;
     const nameGrouppedPlugin = groupBy(prop('pluginName'), data);
     Object.entries(nameGrouppedPlugin).forEach(([pluginName, dataA]) => {
@@ -201,13 +202,14 @@ function outputPluginInfos(data: PluginEventInfo[]) {
             currentPluginTotalTime += tapTime;
         });
         allPluginTime += currentPluginTotalTime;
-        console.log(`Plugin ${pluginName} takes ${prettyTime(currentPluginTotalTime)}`);
+        console.log(`Plugin ${chalk.bold(pluginName)} takes ${prettyTime(currentPluginTotalTime)}`);
     });
     console.log(`All plugins take ${prettyTime(allPluginTime)}`);
 }
 
 function outputLoaderInfos(data: LoaderEventInfo[]) {
     assert(isSortBy(['time'], data), 'loader event info should be sorted by time.');
+    console.log(`${chalk.blue(chalk.bold('Loaders'))}`);
     let allLoaderTime = 0;
     const nameGrouppedLoader = groupBy(prop('loaderName'), data);
     Object.entries(nameGrouppedLoader).forEach(([loaderName, dataA]) => {
@@ -222,7 +224,7 @@ function outputLoaderInfos(data: LoaderEventInfo[]) {
             currentLoaderTotalTime += tapTime;
         });
         allLoaderTime += currentLoaderTotalTime;
-        console.log(`Loader ${loaderName} takes ${prettyTime(currentLoaderTotalTime)}`);
+        console.log(`Loader ${chalk.bold(loaderName)} takes ${prettyTime(currentLoaderTotalTime)}`);
     });
     console.log(`All loaders take ${prettyTime(allLoaderTime)}`);
 }

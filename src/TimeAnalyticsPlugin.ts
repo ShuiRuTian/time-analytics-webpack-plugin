@@ -13,7 +13,24 @@ export declare class WebpackPlugin {
 }
 
 interface TimeAnalyticsPluginOptions {
-    _noop: never;
+    /**
+     * If fase, do nothing
+     */
+    enable: boolean;
+    loader: {
+        /**
+         * If true, display the absolute path of the loader
+         * 
+         * @default false
+         */
+        displayPath: boolean;
+        /**
+         * If true, display the most time consumed resource's path
+         * 
+         * @default 0
+         */
+        topResources: number;
+    };
 }
 
 interface WebpackConfigFactory {

@@ -5,7 +5,7 @@ import { randomUUID } from 'crypto';
 import { performance } from 'perf_hooks';
 import type { AsyncHook, Hook } from 'tapable';
 import { isSymbolObject } from 'util/types';
-import type { Compiler, WebpackPluginFunction, WebpackPluginInstance } from 'webpack';
+import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { AnalyzeInfoKind, analyzer, PluginEventType, TapType } from './analyzer';
 import { WebpackPlugin } from './TimeAnalyticsPlugin';
 import { assert, fail } from './utils';
