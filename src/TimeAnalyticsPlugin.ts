@@ -46,7 +46,7 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
                 time: now(),
             });
 
-            debugger;
+            analyzer.output();
         });
     }
 

@@ -1,6 +1,7 @@
 /* eslint-disable prefer-rest-params */
 /* eslint-disable @typescript-eslint/no-shadow */
 import chalk from 'chalk';
+import { randomUUID } from 'crypto';
 import path from 'path';
 import type { LoaderDefinition, LoaderDefinitionFunction, PitchLoaderDefinitionFunction } from 'webpack';
 import { AnalyzeInfoKind, analyzer, LoaderEventType, LoaderType } from './analyzer';
@@ -106,6 +107,7 @@ loader.pitch = function (this, q, w, e) {
         const loaderName = getLoaderName(path);
         const wrapLoaderFunc = (originLoader: LoaderDefinition | PitchLoaderDefinitionFunction) => {
             // return originLoader;
+            const uuid = randomUUID();
 
             const loaderType = isNormalLoaderFunc(originLoader) ? LoaderType.normal : LoaderType.pitch;
             const loaderTypeText = loaderType === LoaderType.pitch ? 'pitch' : 'normal';
@@ -122,6 +124,8 @@ loader.pitch = function (this, q, w, e) {
 
                         return function () {
                             analyzerInstance.collectLoaderInfo({
+                                callId: uuid,
+                                loaderName,
                                 kind: AnalyzeInfoKind.loader,
                                 eventType: LoaderEventType.end,
                                 loaderType,
@@ -137,6 +141,8 @@ loader.pitch = function (this, q, w, e) {
                 });
 
                 analyzerInstance.collectLoaderInfo({
+                    callId: uuid,
+                    loaderName,
                     kind: AnalyzeInfoKind.loader,
                     eventType: LoaderEventType.start,
                     loaderType,
@@ -157,6 +163,8 @@ loader.pitch = function (this, q, w, e) {
                 }
 
                 analyzerInstance.collectLoaderInfo({
+                    callId: uuid,
+                    loaderName,
                     kind: AnalyzeInfoKind.loader,
                     eventType: LoaderEventType.end,
                     loaderType,
