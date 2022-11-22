@@ -121,9 +121,7 @@ export class ProxyPlugin implements WebpackPlugin {
             return new Proxy(hook, {
                 get: function (target, property) {
                     assert(!isSymbolObject(property), 'Getting Symbol property from "hook", it should never happen, right?');
-                    // `_XXX` is the implement detail that is used internally
-                    // it might be a bad idea, but we want to handle every thing explicitly to take full control of it
-                    if (property.startsWith('_')) return target[property];
+                    if (isIgnoreProperty(target, property)) return target[property];
                     assert(that.knownTapMethodNames.includes(property));
                     const tapMethod = target[property];
                     switch (property) {
@@ -138,6 +136,15 @@ export class ProxyPlugin implements WebpackPlugin {
                     }
                 },
             });
+        }
+
+        function isIgnoreProperty(target: any, property: string) {
+            // `_XXX` is the implement detail that is used internally
+            // it might be a bad idea, but we want to handle every thing explicitly to take full control of it
+            const isImplementationDetail = property.startsWith('_');
+            // if the property is not a function, we do not want to take over it.
+            const isFunction = typeof target[property] === 'function';
+            return isImplementationDetail || !isFunction;
         }
     }
 
@@ -201,7 +208,7 @@ export class ProxyPlugin implements WebpackPlugin {
 
 function wrapTapCallback(this: ProxyPlugin, tapCallback: TapCallback): TapCallback {
     const pluginName = this.proxiedPluginName;
-    const proxyForHookProviderCandidates = this._proxyForHookProviderCandidates;
+    const proxyForHookProviderCandidates = this._proxyForHookProviderCandidates.bind(this);
     return function (...args: any[]) {
         args.forEach(proxyForHookProviderCandidates);
         const uuid = randomUUID();
@@ -228,7 +235,7 @@ function wrapTapCallback(this: ProxyPlugin, tapCallback: TapCallback): TapCallba
 
 function wrapTapAsyncCallback(this: ProxyPlugin, tapCallback: TapAsyncCallback): TapAsyncCallback {
     const pluginName = this.proxiedPluginName;
-    const proxyForHookProviderCandidates = this._proxyForHookProviderCandidates;
+    const proxyForHookProviderCandidates = this._proxyForHookProviderCandidates.bind(this);
     return function (...args: any[]) {
         args.forEach(proxyForHookProviderCandidates);
         const callback = args[args.length - 1];
@@ -259,7 +266,7 @@ function wrapTapAsyncCallback(this: ProxyPlugin, tapCallback: TapAsyncCallback):
 
 function wrapTapPromiseCallback(this: ProxyPlugin, tapCallback: TapPromiseCallback): TapPromiseCallback {
     const pluginName = this.proxiedPluginName;
-    const proxyForHookProviderCandidates = this._proxyForHookProviderCandidates;
+    const proxyForHookProviderCandidates = this._proxyForHookProviderCandidates.bind(this);
     return function (...args: any[]) {
         args.forEach(proxyForHookProviderCandidates);
         const uuid = randomUUID();

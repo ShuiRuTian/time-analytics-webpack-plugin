@@ -149,14 +149,14 @@ const dangerTime = fooTime(6000, chalk.red);
 const warnTime = fooTime(3000, chalk.yellow);
 const safeTime = fooTime(0, chalk.green);
 
-const isNotNil = pipe(isNil, not);
-
 function prettyTime(ms: number) {
-    const functionArray = [dangerTime, warnTime, safeTime];
+    for (const func of [dangerTime, warnTime, safeTime]) {
+        const res = func(ms);
+        if (res)
+            return res;
+    }
 
-    const formattedTime = reduceWhile(isNotNil, (pre, cur) => cur(ms), undefined, functionArray);
-
-    return formattedTime;
+    fail('We did not give a pretty message about time, why?');
 }
 
 function isSortBy<T>(paths: string[], arr: T[]) {
@@ -218,7 +218,7 @@ function outputLoaderInfos(data: LoaderEventInfo[]) {
         Object.entries(idGroupedPlugin).forEach(([callId, dataB]) => {
             assert(dataB.length === 2
                 && dataB[0].eventType === LoaderEventType.start
-                && dataB[1].eventType === LoaderEventType.start
+                && dataB[1].eventType === LoaderEventType.end
                 , 'each tap should start once and end once');
             const tapTime = dataB[1].time - dataB[0].time;
             currentLoaderTotalTime += tapTime;
@@ -226,7 +226,7 @@ function outputLoaderInfos(data: LoaderEventInfo[]) {
         allLoaderTime += currentLoaderTotalTime;
         console.log(`Loader ${loaderName} takes ${prettyTime(currentLoaderTotalTime)}`);
     });
-    console.log(`All plugins take ${prettyTime(allLoaderTime)}`);
+    console.log(`All loaders take ${prettyTime(allLoaderTime)}`);
 }
 
 export const analyzer = new WebpackTimeAnalyzer();
