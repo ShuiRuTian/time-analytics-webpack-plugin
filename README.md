@@ -21,6 +21,15 @@ For loaders, the webpack will import the loader's module each time it's used. So
 
 For plugins, we wrap the plugin with a custom plugin, which will create proxy for most of property of the compiler passed into.
 
+### Some details
+In `speed-measure-webpack-plugin`, when using mini-css-extract-plugin, there is a strange error which is like "the plugin is not called".
+The reason is the mini-css-extract-plugin's plugin will add a unique symbol to compilation object, and in the pitch loader of mini-css-extract-plugin, it will check the symbol.
+Seems pretty reasonable! However, webpack is using a reference equal map in `getCompilationHooks`. But we are using Proxy to take over everything, the reference of a proxy is not the same as the origin target.
+
+So how to resolve it?
+1. Webpack could give each compilation a unique ID, then use the id as key.
+2. Use defineProperty rather than proxy
+
 ## Thanks
 `speed-measure-webpack-plugin`. An awesome plugin, which inspires this repo.
 
