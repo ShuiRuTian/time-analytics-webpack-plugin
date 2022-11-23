@@ -85,8 +85,7 @@ export class ProxyPlugin implements WebpackPlugin {
                         assert(Object.isFrozen(originHooks), 'webpack frozens all `hooks` by defualt');
                         assert(originHooks.constructor.name === 'Object', '`Hooks` should just be plain object');
                         const unfrozenHooks = { ...originHooks };
-                        const ret = that._proxyForHooks(unfrozenHooks, [hooksProvider.constructor.name, property]);
-                        return ret;
+                        return that._proxyForHooks(unfrozenHooks, [hooksProvider.constructor.name, property]);
                     }
                     return target[property];
                 },
@@ -106,8 +105,13 @@ export class ProxyPlugin implements WebpackPlugin {
                     assert(!isSymbolObject(property), 'Getting Symbol property from "hooks", it should never happen, right?');
                     const method = target[property];
                     switch (true) {
-                        case isHook(method) || isFakeHook(method):
+                        case isHook(method):
                             return that._proxyForHook(method, [...propertyTrackPaths, property]);
+                        case isFakeHook(method): {
+                            assert(Object.isFrozen(method), 'fake hook should be frozen');
+                            const unfrozenFakeHook = { ...method };
+                            return that._proxyForHook(unfrozenFakeHook, [...propertyTrackPaths, property]);
+                        }
                         case isHookMap(method):
                             return that._proxyForHookMap(method);
                         default:
@@ -369,10 +373,11 @@ function isHook(obj: any) {
  * 
  * Some hook will be removed in webpack 6, and they are not `Tapable` class but a fake hook.
  * 
- * An example hook is additionalAssets
- * @deprecated 
+ * An example hook is `additionalAssets`
+ * 
+ * @deprecated should be removed if webpack does not use fake hook internally 
  */
- function isFakeHook(obj: any) {
+function isFakeHook(obj: any) {
     return obj._fakeHook;
 }
 
