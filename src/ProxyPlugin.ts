@@ -302,7 +302,7 @@ function wrapTapAsyncCallback(this: ProxyPlugin, tapCallback: TapAsyncCallback):
             analyzer.collectPluginInfo({
                 kind: AnalyzeInfoKind.plugin,
                 eventType: PluginEventType.end,
-                pluginName: '',
+                pluginName,
                 time: performance.now(),
                 tapCallId: uuid,
                 tapType: TapType.async,
