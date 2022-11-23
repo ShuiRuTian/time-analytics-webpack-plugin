@@ -15,22 +15,38 @@ export declare class WebpackPlugin {
 interface TimeAnalyticsPluginOptions {
     /**
      * If fase, do nothing
+     * 
+     * @default true
      */
-    enable: boolean;
-    loader: {
+    enable?: boolean;
+    loader?: {
         /**
          * If true, display the absolute path of the loader
          * 
          * @default false
          */
-        displayPath: boolean;
+        displayPath?: boolean;
         /**
-         * If true, display the most time consumed resource's path
+         * If true, display the most time consumed resource's info
          * 
          * @default 0
          */
-        topResources: number;
+        topResources?: number;
+        /**
+         * Not analytics the exclude loaders
+         * 
+         * Use the package's name.
+         */
+        exclude?: string[];
     };
+    plugin?: {
+        /**
+         * Not analytics the exclude plugins.
+         * 
+         * The name of the plugin itself, not the package's name.
+         */
+        exclude?: string[];
+    }
 }
 
 interface WebpackConfigFactory {
@@ -39,15 +55,6 @@ interface WebpackConfigFactory {
 
 export class TimeAnalyticsPlugin implements WebpackPlugin {
     public apply(compiler: Compiler) {
-        // compiler.hooks.compilation.tap(TimeAnalyticsPlugin.name, (compilation) => {
-        //     NormalModule.getCompilationHooks(compilation).loader.tap(TimeAnalyticsPlugin.name, (loader, module) => {
-        //         // debugger;
-        //     });
-        //     NormalModule.getCompilationHooks(compilation).beforeLoaders.tap(TimeAnalyticsPlugin.name, (loaders, module, obj) => {
-        //         // debugger;
-        //     });
-        // });
-
         compiler.hooks.compile.tap(TimeAnalyticsPlugin.name, () => {
             analyzer.collectWebpackInfo({
                 hookType: WebpackMetaEventType.Compiler_compile,
@@ -67,11 +74,15 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
         });
     }
 
+    constructor(public option: TimeAnalyticsPluginOptions | undefined) {
+        this.option = option;
+    }
+
     public static wrap(webpackConfigOrFactory: Configuration, options?: TimeAnalyticsPluginOptions): Configuration;
     public static wrap(webpackConfigOrFactory: Configuration, options?: TimeAnalyticsPluginOptions): WebpackConfigFactory;
     public static wrap(webpackConfigOrFactory: Configuration | WebpackConfigFactory, options?: TimeAnalyticsPluginOptions) {
         analyzer.initilize();
-        const timeAnalyticsPlugin = new TimeAnalyticsPlugin();
+        const timeAnalyticsPlugin = new TimeAnalyticsPlugin(options);
         if (typeof webpackConfigOrFactory === 'function') {
             return (...args: any[]) => wrapConfigurationCore.call(timeAnalyticsPlugin, webpackConfigOrFactory(...args));
         }
@@ -81,12 +92,24 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
 
 function wrapConfigurationCore(this: TimeAnalyticsPlugin, config: Configuration): Configuration {
     if (config.plugins) {
-        config.plugins = config.plugins.map(wrapPluginCore);
+        config.plugins = config.plugins.map((plugin) => {
+            const pluginName = plugin.constructor.name;
+            if (this.option?.plugin?.exclude?.includes(pluginName)) {
+                return plugin;
+            }
+            return wrapPluginCore(plugin);
+        });
         config.plugins = [this, ...config.plugins];
     }
     if (config.optimization?.minimizer) {
         config.optimization.minimizer = config.optimization.minimizer
-            .map(wrapMinimizer);
+            .map((minimizer) => {
+                const pluginName = minimizer.constructor.name;
+                if (this.option?.plugin?.exclude?.includes(pluginName)) {
+                    return minimizer;
+                }
+                return wrapMinimizer(minimizer);
+            });
     }
     if (config.module) {
         config.module = injectModule(config.module);
@@ -107,7 +130,6 @@ function wrapMinimizer(minimizer: ArrayElement<NonNullable<NonNullable<Configura
 }
 
 function wrapPluginCore(plugin: WebpackPlugin): WebpackPlugin {
-    const pluginName = plugin.constructor.name;
     return new ProxyPlugin(plugin);
 }
 

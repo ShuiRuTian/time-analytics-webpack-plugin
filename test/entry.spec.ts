@@ -62,7 +62,7 @@ describe('Time Analyze Plugin', () => {
 
     const finalWebpackConfig =
       // webpackConfig;
-      TimeAnalyticsPlugin.wrap(webpackConfig);
+      TimeAnalyticsPlugin.wrap(webpackConfig, { plugin: { exclude: ['MiniCssExtractPlugin'] } });
 
     it('the example test case', async () => {
       return new Promise((resolve, reject) => {
