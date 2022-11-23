@@ -10,6 +10,10 @@ speed-measure-webpack-plugin is written in js, some surface is handled roughly.
 
 speed-measure-webpack-plugin does not do many check, and this plugin is strict, we check many situations and if it's not handled, we just throw an error rather than behave as work successfully.
 
+## Behavior
+1. only the plugin wrapped in the origin webpack config could be analytized
+    - the webpack internal plugin is not measured. But this might not be a limitation, if you want to measure internal plugin, you could submit an issue.
+
 ## How does it work?
 To measure time, we must know when the loader/plugins starts and ends.
 
@@ -22,7 +26,7 @@ For loaders, the webpack will import the loader's module each time it's used. So
 For plugins, we wrap the plugin with a custom plugin, which will create proxy for most of property of the compiler passed into.
 
 ### Some details
-In `speed-measure-webpack-plugin`, when using mini-css-extract-plugin, there is a strange error which is like "the plugin is not called".
+In `speed-measure-webpack-plugin`, when using `mini-css-extract-plugin`, there is a strange error which is like "the plugin is not called".
 The reason is the mini-css-extract-plugin's plugin will add a unique symbol to compilation object, and in the pitch loader of mini-css-extract-plugin, it will check the symbol.
 Seems pretty reasonable! However, webpack is using a reference equal map in `getCompilationHooks`. But we are using Proxy to take over everything, the reference of a proxy is not the same as the origin target.
 
@@ -43,11 +47,6 @@ To test the source code just like the real case.
 
 ## Questions
 1. In which condition, will `this.callback()` called? The doc says for multiple results, but it's kind of confused.
-
-2. For js-debug
-what is the difference
-resolveSourceMapLocations
-outFiles
 
 3. For ts
 class A{

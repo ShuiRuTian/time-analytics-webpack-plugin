@@ -191,9 +191,9 @@ export class ProxyPlugin implements WebpackPlugin {
             const isImplementationDetail = property.startsWith('_');
             // if the property is not a function, we do not want to take over it.
             const isFunction = typeof target[property] === 'function';
-            // intercept is useless for us.
-            const isIntercept = property === 'intercept';
-            return isImplementationDetail || !isFunction || isIntercept;
+            // call, callAsync, isUsed and compilte might be used by childCompiler
+            const isIgnoredProperty = ['intercept', 'call', 'callAsync', 'isUsed', 'compile'].includes(property);
+            return isImplementationDetail || !isFunction || isIgnoredProperty;
         }
     }
 
