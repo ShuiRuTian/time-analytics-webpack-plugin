@@ -106,7 +106,7 @@ export class ProxyPlugin implements WebpackPlugin {
                     assert(!isSymbolObject(property), 'Getting Symbol property from "hooks", it should never happen, right?');
                     const method = target[property];
                     switch (true) {
-                        case isHook(method):
+                        case isHook(method) || isFakeHook(method):
                             return that._proxyForHook(method, [...propertyTrackPaths, property]);
                         case isHookMap(method):
                             return that._proxyForHookMap(method);
@@ -362,6 +362,18 @@ function getOrCreate<K, V>(cache: Map<K, V>, key: K, factory: (k: K) => V) {
 
 function isHook(obj: any) {
     return isConstructorNameInPrototypeChain('Hook', obj);
+}
+
+/**
+ * This is a webpack implementation detail.
+ * 
+ * Some hook will be removed in webpack 6, and they are not `Tapable` class but a fake hook.
+ * 
+ * An example hook is additionalAssets
+ * @deprecated 
+ */
+ function isFakeHook(obj: any) {
+    return obj._fakeHook;
 }
 
 function isHookMap(obj: any) {
