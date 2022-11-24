@@ -74,12 +74,6 @@ function getLoaderName(path: string) {
     return loaderName;
 }
 
-const normalLoaderID = '__is_origin_Loader';
-
-function isNormalLoaderFunc(loaderFunc: LoaderDefinitionFunction | PitchLoaderDefinitionFunction): loaderFunc is LoaderDefinitionFunction {
-    return !!(loaderFunc as any)[normalLoaderID];
-}
-
 const loader: LoaderDefinition = function timeAnalyticHackLoader(source) {
     console.log('Time analytics plugin: normal loader is executed');
     const loader = this.loaders[this.loaderIndex];
@@ -105,11 +99,10 @@ loader.pitch = function (this, q, w, e) {
     // `loaderModule` means the cjs or mjs module
     hackWrapLoaderModule(loaderPaths, function wrapLoaderModuleCallback(loaderModule, path) {
         const loaderName = getLoaderName(path);
-        const wrapLoaderFunc = (originLoader: LoaderDefinition | PitchLoaderDefinitionFunction) => {
+        const wrapLoaderFunc = (originLoader: LoaderDefinition | PitchLoaderDefinitionFunction, loaderType: LoaderType) => {
             // return originLoader;
             const uuid = randomUUID();
 
-            const loaderType = isNormalLoaderFunc(originLoader) ? LoaderType.normal : LoaderType.pitch;
             const loaderTypeText = loaderType === LoaderType.pitch ? 'pitch' : 'normal';
             const wrappedLoader = function wrappedLoaderFunc() {
                 const tmp = loaderName;
@@ -189,12 +182,9 @@ loader.pitch = function (this, q, w, e) {
             // get normal loader function according to module is mjs or cjs
             const originNormalLoaderFunc = typeof module === 'function' ? module : module.default;
             const originPitchLoaderFunc = module.pitch;
-            const wrappedNormalLoaderFunc = originNormalLoaderFunc ? wrapLoaderFunc(originNormalLoaderFunc) : undefined;
-            if (wrappedNormalLoaderFunc) {
-                (wrappedNormalLoaderFunc as any)[normalLoaderID] = true;
-            }
 
-            const wrappedPitchLoaderFunc = originPitchLoaderFunc ? wrapLoaderFunc(originPitchLoaderFunc) : undefined;
+            const wrappedNormalLoaderFunc = originNormalLoaderFunc ? wrapLoaderFunc(originNormalLoaderFunc, LoaderType.normal) : undefined;
+            const wrappedPitchLoaderFunc = originPitchLoaderFunc ? wrapLoaderFunc(originPitchLoaderFunc, LoaderType.pitch) : undefined;
 
             // convert the module from either cjs or mjs to a mocked mjs module.
             const mockModule = {
