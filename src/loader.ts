@@ -30,12 +30,12 @@ function hackWrapLoaderModule(loaderPaths: string[], wrapLoaderModuleCallback: W
             const isOriginExportAWebpackLoader = loaderPaths.includes(id);
             if (isOriginExportAWebpackLoader) {
                 assert(path.isAbsolute(id), 'Webpack should convert the loader path to absolute path. Although we not use this info.');
-                console.log(`Wrap Require: it should be webpack which requires loader, the loader is ${id}`);
+                // console.log(`Wrap Require: it should be webpack which requires loader, the loader is ${id}`);
                 // eslint-disable-next-line @typescript-eslint/no-use-before-define
                 const isHackLoader = originExport === loader;
 
                 if (isHackLoader) {
-                    console.log(`Wrap Require: Hack require should not work for ${PACKAGE_LOADER_PATH}`);
+                    // console.log(`Wrap Require: Hack require should not work for ${PACKAGE_LOADER_PATH}`);
                     return originExport;
                 }
                 // if (originExport.__smpHacked) return originExport;
@@ -75,9 +75,7 @@ function getLoaderName(path: string) {
 }
 
 const loader: LoaderDefinition = function timeAnalyticHackLoader(source) {
-    console.log('Time analytics plugin: normal loader is executed');
-    const loader = this.loaders[this.loaderIndex];
-    const loaderName = getLoaderName(loader.path);
+    // console.log('Time analytics plugin: normal loader is executed');
     return source;
 };
 
@@ -86,8 +84,8 @@ const loader: LoaderDefinition = function timeAnalyticHackLoader(source) {
  * 
  * Each time the wrapped function is called, we could do some extra work.
  */
-loader.pitch = function (this, q, w, e) {
-    console.log('Time analytics plugin: pitch loader is executed, take over the "require" function');
+loader.pitch = function () {
+    // console.log('Time analytics plugin: pitch loader is executed, take over the "require" function');
     const analyzerInstance = analyzer;
     const resourcePath = this.resourcePath;
     const loaderPaths = this.loaders
@@ -99,14 +97,14 @@ loader.pitch = function (this, q, w, e) {
     // `loaderModule` means the cjs or mjs module
     hackWrapLoaderModule(loaderPaths, function wrapLoaderModuleCallback(loaderModule, path) {
         const loaderName = getLoaderName(path);
-        const wrapLoaderFunc = (originLoader: LoaderDefinition | PitchLoaderDefinitionFunction, loaderType: LoaderType) => {
+        const wrapLoaderFunc = (originLoader: LoaderDefinitionFunction | PitchLoaderDefinitionFunction, loaderType: LoaderType) => {
             // return originLoader;
             const uuid = randomUUID();
 
             const loaderTypeText = loaderType === LoaderType.pitch ? 'pitch' : 'normal';
             const wrappedLoader = function wrappedLoaderFunc() {
                 const tmp = loaderName;
-                console.log(`Wrapped loader: ${tmp}'s ${loaderTypeText} function is executed.`);
+                // console.log(`Wrapped loader: ${tmp}'s ${loaderTypeText} function is executed.`);
                 // console.log('origin loader is ', originLoader);
                 let isSync = true;
 
@@ -149,10 +147,10 @@ loader.pitch = function (this, q, w, e) {
                 // if it's an async loader, we return `undefined`, as webpack request
                 // however, it feels not really matters
                 if (!isSync) {
-                    console.log(`Origin loader: ${tmp}'s ${loaderTypeText} loader, an async loader, return undefined`);
+                    // console.log(`Origin loader: ${tmp}'s ${loaderTypeText} loader, an async loader, return undefined`);
                     return undefined;
                 } else {
-                    console.log(`Origin loader: ${tmp}'s ${loaderTypeText} loader, not an async loader, result is ${chalk.redBright(ret)}`);
+                    // console.log(`Origin loader: ${tmp}'s ${loaderTypeText} loader, not an async loader, result is ${chalk.redBright(ret)}`);
                 }
 
                 analyzerInstance.collectLoaderInfo({

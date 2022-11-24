@@ -1,6 +1,6 @@
-import type { LoaderDefinition, Configuration, RuleSetRule } from 'webpack';
+import type { RuleSetRule } from 'webpack';
 import { PACKAGE_LOADER_PATH, PACKAGE_NAME } from './const';
-import { assert, fail } from './utils';
+import { fail } from './utils';
 
 function normalizeRuleCore(rule: RuleSetRule) {
     if (rule.loader) {

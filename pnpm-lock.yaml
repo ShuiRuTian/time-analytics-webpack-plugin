@@ -43,16 +43,20 @@ importers:
 
   test:
     specifiers:
+      '@types/chai': ^4.3.4
       '@types/fs-extra': ^9.0.13
       '@types/mocha': ^10.0.0
       '@types/node': ^16.11.56
       '@types/shelljs': ^0.8.11
+      chai: ^4.3.7
       fs-extra: ^10.1.0
       mocha: ^10.1.0
       shelljs: ^0.8.5
       time-analytics-webpack-plugin: workspace:*
       ts-node: ^10.9.1
     dependencies:
+      '@types/chai': 4.3.4
+      chai: 4.3.7
       ts-node: 10.9.1_@types+node@16.18.3
     devDependencies:
       '@types/fs-extra': 9.0.13
@@ -165,6 +169,10 @@ packages:
   /@tsconfig/recommended/1.0.1:
     resolution: {integrity: sha1-dhm605fgbq0cUYKSbJRODKYXf1I=}
     dev: true
+
+  /@types/chai/4.3.4:
+    resolution: {integrity: sha512-KnRanxnpfpjUTqTCXslZSEdLfXExwgNxYPdiO2WGUj8+HDjFi8R3k5RVKPeSCzLjCcshCAtVO2QBbVuAV4kTnw==}
+    dev: false
 
   /@types/fs-extra/9.0.13:
     resolution: {integrity: sha1-dZT7rgT+fxkYzos9IT90/0SsH0U=}
@@ -428,6 +436,10 @@ packages:
       es-shim-unscopables: 1.0.0
     dev: true
 
+  /assertion-error/1.1.0:
+    resolution: {integrity: sha512-jgsaNduz+ndvGyFt3uSuWqvy4lCnIJiovtouQN5JZHOKCS2QuhEdbcQHFhVksz2N2U9hXJo8odG7ETyWlEeuDw==}
+    dev: false
+
   /balanced-match/1.0.2:
     resolution: {integrity: sha1-6D46fj8wCzTLnYf2FfoMvzV2kO4=}
     dev: true
@@ -477,6 +489,23 @@ packages:
     resolution: {integrity: sha1-VoW5XrIJrJwMF3Rnd4ychN9Yupo=}
     engines: {node: '>=10'}
     dev: true
+
+  /chai/4.3.7:
+    resolution: {integrity: sha512-HLnAzZ2iupm25PlN0xFreAlBA5zaBSv3og0DdeGA4Ar6h6rJ3A0rolRUKJhSF2V10GZKDgWF/VmAEsNWjCRB+A==}
+    engines: {node: '>=4'}
+    dependencies:
+      assertion-error: 1.1.0
+      check-error: 1.0.2
+      deep-eql: 4.1.2
+      get-func-name: 2.0.0
+      loupe: 2.3.6
+      pathval: 1.1.1
+      type-detect: 4.0.8
+    dev: false
+
+  /check-error/1.0.2:
+    resolution: {integrity: sha512-BrgHpW9NURQgzoNyjfq0Wu6VFO6D7IZEmJNdtgNqpzGG8RuNFHt2jQxWlAs4HMe119chBnv+34syEZtc6IhLtA==}
+    dev: false
 
   /chokidar/3.5.3:
     resolution: {integrity: sha1-HPN8hwe5Mr0a8a4iwEMuKs0ZA70=}
@@ -583,6 +612,13 @@ packages:
     resolution: {integrity: sha1-qkcte/Zg6xXzSU79UxyrfypwmDc=}
     engines: {node: '>=10'}
     dev: true
+
+  /deep-eql/4.1.2:
+    resolution: {integrity: sha512-gT18+YW4CcW/DBNTwAmqTtkJh7f9qqScu2qFVlx7kCoeY9tlBu9cUcr7+I+Z/noG8INehS3xQgLpTtd/QUTn4w==}
+    engines: {node: '>=6'}
+    dependencies:
+      type-detect: 4.0.8
+    dev: false
 
   /deep-is/0.1.4:
     resolution: {integrity: sha1-pvLc5hL63S7x9Rm3NVHxfoUZmDE=}
@@ -1018,6 +1054,10 @@ packages:
     engines: {node: 6.* || 8.* || >= 10.*}
     dev: true
 
+  /get-func-name/2.0.0:
+    resolution: {integrity: sha512-Hm0ixYtaSZ/V7C8FJrtZIuBBI+iSgL+1Aq82zSu8VQNB4S3Gk8e7Qs3VwBDJAhmRZcFqkl3tQu36g/Foh5I5ig==}
+    dev: false
+
   /get-intrinsic/1.1.3:
     resolution: {integrity: sha1-BjyEMprZPoOJPH9PJD72P/o1E4U=}
     dependencies:
@@ -1366,6 +1406,12 @@ packages:
       is-unicode-supported: 0.1.0
     dev: true
 
+  /loupe/2.3.6:
+    resolution: {integrity: sha512-RaPMZKiMy8/JruncMU5Bt6na1eftNoo++R4Y+N2FrxkDVTrGvcyzFTsaGif4QTeKESheMGegbhw6iUAq+5A8zA==}
+    dependencies:
+      get-func-name: 2.0.0
+    dev: false
+
   /lru-cache/6.0.0:
     resolution: {integrity: sha1-bW/mVw69lqr5D8rR2vo7JWbbOpQ=}
     engines: {node: '>=10'}
@@ -1564,6 +1610,10 @@ packages:
     resolution: {integrity: sha1-hO0BwKe6OAr+CdkKjBgNzZ0DBDs=}
     engines: {node: '>=8'}
     dev: true
+
+  /pathval/1.1.1:
+    resolution: {integrity: sha512-Dp6zGqpTdETdR63lehJYPeIOqpiNBNtc7BpWSLrOje7UaIsE5aY92r/AunQA7rsXvet3lrJ3JnZX29UPTKXyKQ==}
+    dev: false
 
   /picomatch/2.3.1:
     resolution: {integrity: sha1-O6ODNzNkbZ0+SZWUbBNlpn+wekI=}
@@ -1880,6 +1930,11 @@ packages:
     dependencies:
       prelude-ls: 1.2.1
     dev: true
+
+  /type-detect/4.0.8:
+    resolution: {integrity: sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==}
+    engines: {node: '>=4'}
+    dev: false
 
   /type-fest/0.20.2:
     resolution: {integrity: sha1-G/IH9LKPkVg2ZstfvTJ4hzAc1fQ=}

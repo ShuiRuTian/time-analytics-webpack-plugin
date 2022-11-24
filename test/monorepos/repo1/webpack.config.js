@@ -29,6 +29,7 @@ module.exports = {
     ]
   },
   optimization: {
+    // minimize: false,
     minimizer: [
       // TerserPlugin need some properties of compiler.webpack function
       new TerserPlugin({ parallel: true }),

@@ -143,7 +143,7 @@ const fooTime = curry((limit: number, color: Chalk, time: number) => {
     return undefined;
 });
 
-const dangerTime = fooTime(6000, chalk.red);
+const dangerTime = fooTime(8000, chalk.red);
 const warnTime = fooTime(3000, chalk.yellow);
 const safeTime = fooTime(0, chalk.green);
 

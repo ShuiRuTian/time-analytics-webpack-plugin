@@ -19,13 +19,34 @@ interface TimeAnalyticsPluginOptions {
      * @default true
      */
     enable?: boolean;
+    /**
+     * If provided, write the result to a file.
+     * Otherwise the stdout stream.
+     */
+    outputFile?: string;
+    /**
+     * Display yellow if time is more than this limit.
+     * 
+     * ms
+     * 
+     * @default 3000
+     */
+    warnTimeLimit?: number;
+    /**
+     * Display red if time is more than this limit.
+     * 
+     * ms
+     * 
+     * @default 8000
+     */
+    dangerTimeLimit?: number;
     loader?: {
         /**
-         * If true, display the absolute path of the loader
+         * If true, output the absolute path of the loader
          * 
          * @default false
          */
-        displayPath?: boolean;
+        displayAbsolutePath?: boolean;
         /**
          * If true, display the most time consumed resource's info
          * 
@@ -81,6 +102,9 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
     public static wrap(webpackConfigOrFactory: Configuration, options?: TimeAnalyticsPluginOptions): Configuration;
     public static wrap(webpackConfigOrFactory: Configuration, options?: TimeAnalyticsPluginOptions): WebpackConfigFactory;
     public static wrap(webpackConfigOrFactory: Configuration | WebpackConfigFactory, options?: TimeAnalyticsPluginOptions) {
+        if (!options?.enable) {
+            return webpackConfigOrFactory;
+        }
         analyzer.initilize();
         const timeAnalyticsPlugin = new TimeAnalyticsPlugin(options);
         if (typeof webpackConfigOrFactory === 'function') {
@@ -91,18 +115,19 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
 }
 
 function wrapConfigurationCore(this: TimeAnalyticsPlugin, config: Configuration): Configuration {
-    if (config.plugins) {
-        config.plugins = config.plugins.map((plugin) => {
+    const newConfig = { ...config };
+    if (newConfig.plugins) {
+        newConfig.plugins = newConfig.plugins.map((plugin) => {
             const pluginName = plugin.constructor.name;
             if (this.option?.plugin?.exclude?.includes(pluginName)) {
                 return plugin;
             }
             return wrapPluginCore(plugin);
         });
-        config.plugins = [this, ...config.plugins];
+        newConfig.plugins = [this, ...newConfig.plugins];
     }
-    if (config.optimization?.minimizer) {
-        config.optimization.minimizer = config.optimization.minimizer
+    if (newConfig.optimization?.minimizer) {
+        newConfig.optimization.minimizer = newConfig.optimization.minimizer
             .map((minimizer) => {
                 const pluginName = minimizer.constructor.name;
                 if (this.option?.plugin?.exclude?.includes(pluginName)) {
@@ -111,10 +136,10 @@ function wrapConfigurationCore(this: TimeAnalyticsPlugin, config: Configuration)
                 return wrapMinimizer(minimizer);
             });
     }
-    if (config.module) {
-        config.module = injectModule(config.module);
+    if (newConfig.module) {
+        newConfig.module = injectModule(newConfig.module);
     }
-    return config;
+    return newConfig;
 }
 
 function isWebpackPlugin(a: any): a is WebpackPlugin {
@@ -133,16 +158,17 @@ function wrapPluginCore(plugin: WebpackPlugin): WebpackPlugin {
     return new ProxyPlugin(plugin);
 }
 
-function injectModule(module: ModuleOptions) {
-    if (module.rules) {
-        if (!isRuleObjectArray(module.rules)) {
+function injectModule(moduleOptions: ModuleOptions) {
+    const newModuleOptions = { ...moduleOptions };
+    if (newModuleOptions.rules) {
+        if (!isRuleObjectArray(newModuleOptions.rules)) {
             fail('There are plain string "..." in "module.rules", why do you need this? Please submit an issue.');
         }
 
-        module.rules = normalizeRules(module.rules);
+        newModuleOptions.rules = normalizeRules(newModuleOptions.rules);
     }
 
-    return module;
+    return newModuleOptions;
 
     function isRuleObjectArray(rules: NonNullable<ModuleOptions['rules']>): rules is RuleSetRule[] {
         return rules.every(rule => rule !== '...');

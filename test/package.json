@@ -15,6 +15,8 @@
     "time-analytics-webpack-plugin": "workspace:*"
   },
   "dependencies": {
+    "@types/chai": "^4.3.4",
+    "chai": "^4.3.7",
     "ts-node": "^10.9.1"
   }
 }
