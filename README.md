@@ -19,7 +19,8 @@ speed-measure-webpack-plugin does not do many check, and this plugin is strict, 
     - feels like there is no way to hack.
     - even worse, there might be strange error, becasuse the reference of Proxy and target is different.
         - This plugin hacks WeakMap to avoid error, but polyfill could add a custom WeakMap, so it's kind of hard to give a promise.
-        - Try to add a unique ID during hook `Compilation`(maybe `thisCompilation` is a better choice?)
+        - Try to add a unique ID during hook `thisCompilation`, the stage is "-100", to make it fistly.
+
 
 ## How does it work?
 To measure time, we must know when the loader/plugins starts and ends.

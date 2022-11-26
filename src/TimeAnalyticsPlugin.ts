@@ -80,7 +80,11 @@ interface WebpackConfigFactory {
 
 export class TimeAnalyticsPlugin implements WebpackPlugin {
     public apply(compiler: Compiler) {
-        compiler.hooks.compilation.tap(TimeAnalyticsPlugin.name, (compilation) => {
+        compiler.hooks.thisCompilation.tap({
+            name: TimeAnalyticsPlugin.name,
+            // Make sure to be called fistly
+            stage: -100, 
+        }, (compilation) => {
             assert(!(compilation as any)[COMPILATION_WEAK_MAP_ID_KEY], 'add unique id to compilation only once!');
             (compilation as any)[COMPILATION_WEAK_MAP_ID_KEY] = new WebpackCompilationWeakMapId();
         });
