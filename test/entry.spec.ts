@@ -58,7 +58,6 @@ describe('Time Analyze Plugin', () => {
 
       assert(existsSync(webpackPackagePath), 'each repo must have a webpack config called "webpack.config.js" in the root.');
 
-
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const webpackConfig: Configuration = require(webpackConfigurationPath);
 
@@ -66,7 +65,12 @@ describe('Time Analyze Plugin', () => {
 
       const outputFolder = webpackConfig?.output?.path;
 
-      const wrappedWebpackConfig = TimeAnalyticsPlugin.wrap(webpackConfig, { plugin: { exclude: ['MiniCssExtractPlugin'] } });
+      const wrappedWebpackConfig = TimeAnalyticsPlugin.wrap(webpackConfig, {
+        plugin:
+        {
+          // exclude: ['MiniCssExtractPlugin'],
+        },
+      });
 
       it('should be transparent when use TimeAnalyticsPlugin', async () => {
         await executeWebpack(webpackFunc, webpackConfig);

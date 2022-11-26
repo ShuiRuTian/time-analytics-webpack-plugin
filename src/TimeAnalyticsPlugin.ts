@@ -4,6 +4,10 @@ import { AnalyzeInfoKind, analyzer, WebpackMetaEventType } from './analyzer';
 import { ProxyPlugin } from './ProxyPlugin';
 import { normalizeRules } from './ruleHelper';
 import { assert, fail, now } from './utils';
+import './sideEffects/hackWeakMap';
+import { COMPILATION_WEAK_MAP_ID_KEY } from './const';
+import { randomUUID } from 'crypto';
+import { WebpackCompilationWeakMapId } from './sideEffects/WeakMapIdObject';
 
 export declare class WebpackPlugin {
     /**
@@ -76,6 +80,11 @@ interface WebpackConfigFactory {
 
 export class TimeAnalyticsPlugin implements WebpackPlugin {
     public apply(compiler: Compiler) {
+        compiler.hooks.compilation.tap(TimeAnalyticsPlugin.name, (compilation) => {
+            assert(!(compilation as any)[COMPILATION_WEAK_MAP_ID_KEY], 'add unique id to compilation only once!');
+            (compilation as any)[COMPILATION_WEAK_MAP_ID_KEY] = new WebpackCompilationWeakMapId();
+        });
+
         compiler.hooks.compile.tap(TimeAnalyticsPlugin.name, () => {
             analyzer.collectWebpackInfo({
                 hookType: WebpackMetaEventType.Compiler_compile,
@@ -102,7 +111,7 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
     public static wrap(webpackConfigOrFactory: Configuration, options?: TimeAnalyticsPluginOptions): Configuration;
     public static wrap(webpackConfigOrFactory: Configuration, options?: TimeAnalyticsPluginOptions): WebpackConfigFactory;
     public static wrap(webpackConfigOrFactory: Configuration | WebpackConfigFactory, options?: TimeAnalyticsPluginOptions) {
-        if (!options?.enable) {
+        if (options?.enable === false) {
             return webpackConfigOrFactory;
         }
         analyzer.initilize();
