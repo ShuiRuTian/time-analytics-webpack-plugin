@@ -120,31 +120,39 @@ class WebpackTimeAnalyzer {
     private _isInitilized = false;
 
     initilize() {
-        if (this._isInitilized) {
-            fail(`${PACKAGE_NAME} is initialized twice, why do you do this? Please submit an issue.`);
-        }
+        assert(this._isInitilized === false, '${PACKAGE_NAME} is initialized twice, why do you do this? Please submit an issue.');
         this._isInitilized = true;
     }
 
-    loaderData: LoaderEventInfo[] = [];
+    clear() {
+        assert(this._isInitilized === true, 'Time Analyzer must be initialized when clearing.');
+        this._isInitilized = false;
+        this.loaderData = [];
+        this.pluginData = [];
+        this.metaData = [];
+    }
+
+    private loaderData: LoaderEventInfo[] = [];
 
     collectLoaderInfo(loaderInfo: LoaderEventInfo) {
         this.loaderData.push(loaderInfo);
     }
 
-    pluginData: PluginEventInfo[] = [];
+    private pluginData: PluginEventInfo[] = [];
 
     collectPluginInfo(pluginInfo: PluginEventInfo) {
         this.pluginData.push(pluginInfo);
     }
 
-    metaData: WebpackMetaEventInfo[] = [];
+    private metaData: WebpackMetaEventInfo[] = [];
 
     collectWebpackInfo(metaInfo: WebpackMetaEventInfo) {
         this.metaData.push(metaInfo);
     }
 
     output(option: OutputOption): void {
+        assert(this._isInitilized === true, 'Time Analyzer must be initialized when outputing.');
+
         // TODO: split analyze and output
         const messages1 = outputMetaInfo(this.metaData, option);
         const messages2 = outputPluginInfos(this.pluginData, option);
@@ -157,6 +165,8 @@ class WebpackTimeAnalyzer {
         } else {
             console.log(content);
         }
+
+        this.clear();
     }
 }
 

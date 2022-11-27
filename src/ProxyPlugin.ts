@@ -7,20 +7,8 @@ import type { AsyncHook, Hook, HookMap } from 'tapable';
 import { isSymbolObject } from 'util/types';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { AnalyzeInfoKind, analyzer, PluginEventType, TapType } from './analyzer';
-import { WebpackPlugin } from './TimeAnalyticsPlugin';
-import { assert, fail, isConstructorNameInPrototypeChain } from './utils';
-
-const injectedPlugins = new Set<WebpackPluginInstance>();
-const injectedPluginNames = new Set<string>();
-
-function validatePluginIsUsedOnce(plugin: WebpackPluginInstance) {
-    const pluginName = plugin.constructor.name;
-    injectedPlugins.add(plugin);
-    injectedPluginNames.add(plugin.constructor.name);
-    if (injectedPlugins.size !== injectedPluginNames.size) {
-        fail(`${pluginName} is used twice, why?`);
-    }
-}
+import { isWebpackPlugin, WebpackPlugin, WebpackPluginLikeFunction } from './TimeAnalyticsPlugin';
+import { assert, ConsoleHelper, fail, isConstructorNameInPrototypeChain } from './utils';
 
 type Tap = Hook<any, any>['tap'];
 type TapAsync = AsyncHook<any, any>['tapAsync'];
@@ -37,19 +25,39 @@ type TapPromiseCallback = Parameters<TapPromise>[1];
 type PropertyTrackPaths = string[];
 
 export class ProxyPlugin implements WebpackPlugin {
-    private _proxiedPlugin: WebpackPlugin;
+    private _proxiedPlugin: WebpackPlugin | WebpackPluginLikeFunction;
 
     proxiedPluginName: string;
 
-    constructor(proxiedPlugin: WebpackPlugin) {
-        validatePluginIsUsedOnce(proxiedPlugin);
+    injectedPluginNames = new Set<string>();
+
+    private validatePluginIsUsedOnce(plugin: WebpackPluginInstance) {
+        const pluginName = plugin.constructor.name;
+        if (this.injectedPluginNames.has(pluginName)) {
+            ConsoleHelper.warn(`${pluginName} is used twice, are you sure you really want to do this?`);
+        } else {
+            this.injectedPluginNames.add(pluginName);
+        }
+    }
+
+
+    constructor(proxiedPlugin: WebpackPlugin | WebpackPluginLikeFunction) {
+        this.validatePluginIsUsedOnce(proxiedPlugin);
         this._proxiedPlugin = proxiedPlugin;
         this.proxiedPluginName = proxiedPlugin.constructor.name;
     }
 
     apply(compiler: Compiler): void {
         const proxiedCompiler = this._proxyForHookProviderCandidates(compiler);
-        this._proxiedPlugin.apply(proxiedCompiler);
+        if (isWebpackPlugin(this._proxiedPlugin)) {
+            // @ts-ignore, here is tricky, TS could not distinguish apply intertaged from Object and a function called apply 
+            // Here is WebpackPlugin instance
+            this._proxiedPlugin.apply(proxiedCompiler);
+        } else {
+            // @ts-ignore, here is tricky, TS could not distinguish apply intertaged from Object and a function called apply 
+            // Here is function
+            this._proxiedPlugin.apply(proxiedCompiler, proxiedCompiler);
+        }
     }
 
     private _hookProviderCandidatesClassName = ['Compiler', 'Compilation', 'ContextModuleFactory', 'JavascriptParser', 'NormalModuleFactory'];

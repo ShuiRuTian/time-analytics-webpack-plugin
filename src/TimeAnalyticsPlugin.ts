@@ -2,7 +2,7 @@ import type { Compiler, Configuration, ModuleOptions, RuleSetRule } from 'webpac
 import { AnalyzeInfoKind, analyzer, WebpackMetaEventType } from './analyzer';
 import { ProxyPlugin } from './ProxyPlugin';
 import { normalizeRules } from './loaderHelper';
-import { assert, fail, now } from './utils';
+import { assert, ConsoleHelper, fail, now } from './utils';
 import './sideEffects/hackWeakMap';
 import { COMPILATION_WEAK_MAP_ID_KEY } from './const';
 import { WebpackCompilationWeakMapId } from './sideEffects/WeakMapIdObject';
@@ -13,6 +13,8 @@ export declare class WebpackPlugin {
      */
     apply(compiler: Compiler): void;
 }
+
+export type WebpackPluginLikeFunction = (this: Compiler, compiler: Compiler) => void;
 
 interface TimeAnalyticsPluginOptions {
     /**
@@ -91,6 +93,8 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
         });
 
         compiler.hooks.compile.tap(TimeAnalyticsPlugin.name, () => {
+            analyzer.initilize();
+
             analyzer.collectWebpackInfo({
                 hookType: WebpackMetaEventType.Compiler_compile,
                 kind: AnalyzeInfoKind.webpackMeta,
@@ -123,7 +127,6 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
         if (options?.enable === false) {
             return webpackConfigOrFactory;
         }
-        analyzer.initilize();
         const timeAnalyticsPlugin = new TimeAnalyticsPlugin(options);
         if (typeof webpackConfigOrFactory === 'function') {
             return (...args: any[]) => wrapConfigurationCore.call(timeAnalyticsPlugin, webpackConfigOrFactory(...args));
@@ -160,16 +163,22 @@ function wrapConfigurationCore(this: TimeAnalyticsPlugin, config: Configuration)
     return newConfig;
 }
 
-function isWebpackPlugin(a: any): a is WebpackPlugin {
-    return typeof a.apply === 'function';
+/**
+ * Not accurate
+ */
+export function isWebpackPlugin(a: any): a is WebpackPlugin {
+    return typeof a.apply === 'function' && a.apply !== Object.apply;
 }
 
 type ArrayElement<ArrayType extends readonly unknown[]> =
     ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
 
-function wrapMinimizer(minimizer: ArrayElement<NonNullable<NonNullable<Configuration['optimization']>['minimizer']>>): WebpackPlugin {
-    assert(isWebpackPlugin(minimizer), 'Could not handle if minimizer is not a plugin now.');
-    return wrapPluginCore(minimizer);
+function wrapMinimizer(minimizer: ArrayElement<NonNullable<NonNullable<Configuration['optimization']>['minimizer']>>) {
+    if (isWebpackPlugin(minimizer)) {
+        return wrapPluginCore(minimizer);
+    }
+    ConsoleHelper.warn('meet one minimizer which is a function, Time Analytics plugin could not analyze such situration.');
+    return minimizer;
 }
 
 function wrapPluginCore(plugin: WebpackPlugin): WebpackPlugin {
