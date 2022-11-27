@@ -7,6 +7,7 @@ import shelljs from 'shelljs';
 import { MONOREPO_FOLDER_PATH, PROJ_ROOT_PATH, repoInit } from './util';
 import type { Configuration, webpack } from 'webpack';
 import { expect } from 'chai';
+import { beforeEach } from 'mocha';
 
 const setupMonoTestRepo = (): void => {
   shelljs.pushd();
@@ -65,11 +66,12 @@ describe('Time Analyze Plugin', () => {
 
       const outputFolder = webpackConfig?.output?.path;
 
-      const wrappedWebpackConfig = TimeAnalyticsPlugin.wrap(webpackConfig, {
-        plugin:
-        {
-          // exclude: ['MiniCssExtractPlugin'],
-        },
+      const wrappedWebpackConfig = TimeAnalyticsPlugin.wrap(webpackConfig);
+
+      const fileOutputConfig = TimeAnalyticsPlugin.wrap(webpackConfig);
+
+      beforeEach(function clearOutputFoder() {
+        shelljs.rm(outputFolder);
       });
 
       it('should be transparent when use TimeAnalyticsPlugin', async () => {

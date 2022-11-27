@@ -24,21 +24,10 @@ function normalizeRuleCore(rule: RuleSetRule) {
     if (rule.oneOf) {
         rule.oneOf = normalizeRules(rule.oneOf);
     }
+
     if (rule.rules) {
         rule.rules = normalizeRules(rule.rules);
     }
-    if (rule.resource) {
-        fail(`${PACKAGE_NAME} does not support "Rule.resource" option as a function now.`);
-    }
-    // if (Array.isArray(rule.resource)) {
-    //     rule.resource = normalizeRules(rule.resource);
-    // }
-    // if (rule.resource && rule.resource.and) {
-    //     rule.resource.and = normalizeRules(rule.resource.and);
-    // }
-    // if (rule.resource && rule.resource.or) {
-    //     rule.resource.or = normalizeRules(rule.resource.or);
-    // }
 
     return rule;
 }

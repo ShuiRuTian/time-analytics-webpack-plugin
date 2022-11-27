@@ -1,12 +1,10 @@
 import type { Compiler, Configuration, ModuleOptions, RuleSetRule } from 'webpack';
-import { NormalModule } from 'webpack';
 import { AnalyzeInfoKind, analyzer, WebpackMetaEventType } from './analyzer';
 import { ProxyPlugin } from './ProxyPlugin';
-import { normalizeRules } from './ruleHelper';
+import { normalizeRules } from './loaderHelper';
 import { assert, fail, now } from './utils';
 import './sideEffects/hackWeakMap';
 import { COMPILATION_WEAK_MAP_ID_KEY } from './const';
-import { randomUUID } from 'crypto';
 import { WebpackCompilationWeakMapId } from './sideEffects/WeakMapIdObject';
 
 export declare class WebpackPlugin {
@@ -25,21 +23,22 @@ interface TimeAnalyticsPluginOptions {
     enable?: boolean;
     /**
      * If provided, write the result to a file.
+     * 
      * Otherwise the stdout stream.
      */
     outputFile?: string;
     /**
-     * Display yellow if time is more than this limit.
+     * Display the time as warning color if time is more than this limit.
      * 
-     * ms
+     * The unit is ms.
      * 
      * @default 3000
      */
     warnTimeLimit?: number;
     /**
-     * Display red if time is more than this limit.
+     * Display the time as danger color if time is more than this limit.
      * 
-     * ms
+     * The unit is ms.
      * 
      * @default 8000
      */
@@ -49,26 +48,28 @@ interface TimeAnalyticsPluginOptions {
          * If true, output the absolute path of the loader
          * 
          * @default false
+         * @NotImplementYet
          */
         displayAbsolutePath?: boolean;
         /**
          * If true, display the most time consumed resource's info
          * 
          * @default 0
+         * @NotImplementYet
          */
         topResources?: number;
         /**
-         * Not analytics the exclude loaders
+         * The loaders that should not be analytized.
          * 
-         * Use the package's name.
+         * Use the node package's name.
          */
         exclude?: string[];
     };
     plugin?: {
         /**
-         * Not analytics the exclude plugins.
+         * The plugins that should not be analytized.
          * 
-         * The name of the plugin itself, not the package's name.
+         * The name is the plugin class itself, not the package's name.
          */
         exclude?: string[];
     }
@@ -83,7 +84,7 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
         compiler.hooks.thisCompilation.tap({
             name: TimeAnalyticsPlugin.name,
             // Make sure to be called fistly
-            stage: -100, 
+            stage: -100,
         }, (compilation) => {
             assert(!(compilation as any)[COMPILATION_WEAK_MAP_ID_KEY], 'add unique id to compilation only once!');
             (compilation as any)[COMPILATION_WEAK_MAP_ID_KEY] = new WebpackCompilationWeakMapId();
@@ -104,7 +105,11 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
                 time: now(),
             });
 
-            analyzer.output();
+            analyzer.output({
+                filePath: this.option?.outputFile,
+                dangerTimeLimit: this.option?.dangerTimeLimit ?? 8000,
+                warnTimeLimit: this.option?.warnTimeLimit ?? 3000,
+            });
         });
     }
 

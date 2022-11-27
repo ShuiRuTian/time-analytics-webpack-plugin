@@ -33,12 +33,12 @@ importers:
       chalk: ^4.1.2
       ramda: ^0.28.0
     dependencies:
-      '@types/ramda': registry.npmmirror.com/@types/ramda/0.28.20
       chalk: registry.npmmirror.com/chalk/4.1.2
       ramda: registry.npmmirror.com/ramda/0.28.0
     devDependencies:
       '@tsconfig/recommended': 1.0.1
       '@types/node': 16.18.3
+      '@types/ramda': registry.npmmirror.com/@types/ramda/0.28.20
       '@types/tapable': 2.2.2
 
   test:
@@ -2125,7 +2125,7 @@ packages:
     version: 0.28.20
     dependencies:
       ts-toolbelt: registry.npmmirror.com/ts-toolbelt/6.15.5
-    dev: false
+    dev: true
 
   registry.npmmirror.com/@webassemblyjs/ast/1.11.1:
     resolution: {integrity: sha512-ukBh14qFLjxTQNTXocdyksN5QdM28S1CxHt2rdskFyL+xFV7VremuBLVbmCePj+URalXBENx/9Lm7lnhihtCSw==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@webassemblyjs/ast/-/ast-1.11.1.tgz}
@@ -2683,7 +2683,7 @@ packages:
     resolution: {integrity: sha512-FZIXf1ksVyLcfr7M317jbB67XFJhOO1YqdTcuGaq9q5jLUoTikukZ+98TPjKiP2jC5CgmYdWWYs0s2nLSU0/1A==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/ts-toolbelt/-/ts-toolbelt-6.15.5.tgz}
     name: ts-toolbelt
     version: 6.15.5
-    dev: false
+    dev: true
 
   registry.npmmirror.com/update-browserslist-db/1.0.10_browserslist@4.21.4:
     resolution: {integrity: sha512-OztqDenkfFkbSG+tRxBeAnCVPckDBcvibKd35yDONx6OU8N7sqgwc7rCbkJ/WcYtVRZ4ba68d6byhC21GFh7sQ==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/update-browserslist-db/-/update-browserslist-db-1.0.10.tgz}

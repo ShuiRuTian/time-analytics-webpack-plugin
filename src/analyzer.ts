@@ -1,4 +1,7 @@
 import chalk, { Chalk } from 'chalk';
+import { writeFileSync } from 'fs';
+import { EOL } from 'os';
+import { resolve } from 'path';
 import { curry, groupBy, path, prop } from 'ramda';
 import { PACKAGE_NAME } from './const';
 import { assert, fail } from './utils';
@@ -100,6 +103,19 @@ export interface WebpackMetaEventInfo {
 
 export type AnalyzeEventInfo = LoaderEventInfo | PluginEventInfo;
 
+export interface OutputOption {
+    /**
+     * If there is a path, will output the content to the file.
+     * 
+     * If file is not exist, will create it, but the folder must be existed.
+     * 
+     * If file is exist, overwrite the content.
+     */
+    filePath?: string;
+    warnTimeLimit: number;
+    dangerTimeLimit: number;
+}
+
 class WebpackTimeAnalyzer {
     private _isInitilized = false;
 
@@ -128,14 +144,23 @@ class WebpackTimeAnalyzer {
         this.metaData.push(metaInfo);
     }
 
-    output(): void {
-        outputMetaInfo(this.metaData);
-        outputPluginInfos(this.pluginData);
-        outputLoaderInfos(this.loaderData);
+    output(option: OutputOption): void {
+        // TODO: split analyze and output
+        const messages1 = outputMetaInfo(this.metaData, option);
+        const messages2 = outputPluginInfos(this.pluginData, option);
+        const messages3 = outputLoaderInfos(this.loaderData, option);
+        const content = [...messages1, ...messages2, ...messages3].join(EOL);
+        if (option.filePath) {
+            const outputFileAbsolutePath = resolve(option.filePath);
+            console.log(`[${PACKAGE_NAME}]: try to write file to file "${outputFileAbsolutePath}"`);
+            writeFileSync(option.filePath, content);
+        } else {
+            console.log(content);
+        }
     }
 }
 
-const fooTime = curry((limit: number, color: Chalk, time: number) => {
+const colorTime = curry((limit: number, color: Chalk, time: number) => {
     if (time >= limit) {
         const formatedTime = color(time.toString() + 'ms');
         return color(formatedTime);
@@ -143,11 +168,10 @@ const fooTime = curry((limit: number, color: Chalk, time: number) => {
     return undefined;
 });
 
-const dangerTime = fooTime(8000, chalk.red);
-const warnTime = fooTime(3000, chalk.yellow);
-const safeTime = fooTime(0, chalk.green);
-
-function prettyTime(ms: number) {
+function prettyTime(ms: number, option: OutputOption) {
+    const dangerTime = colorTime(option.dangerTimeLimit, chalk.red);
+    const warnTime = colorTime(option.warnTimeLimit, chalk.yellow);
+    const safeTime = colorTime(0, chalk.green);
     for (const func of [dangerTime, warnTime, safeTime]) {
         const res = func(ms);
         if (res)
@@ -157,7 +181,7 @@ function prettyTime(ms: number) {
     fail('We did not give a pretty message about time, why?');
 }
 
-function isSortBy<T>(paths: string[], arr: T[]) {
+function isArraySortBy<T>(paths: string[], arr: T[]) {
     let prevValue = 0;
 
     for (const item of arr) {
@@ -171,23 +195,26 @@ function isSortBy<T>(paths: string[], arr: T[]) {
     return true;
 }
 
-function outputMetaInfo(data: WebpackMetaEventInfo[]) {
+function outputMetaInfo(data: WebpackMetaEventInfo[], option: OutputOption) {
     // validate
-    assert(isSortBy(['time'], data), 'webpack meta event info should be sorted by time.');
+    assert(isArraySortBy(['time'], data), 'webpack meta event info should be sorted by time.');
     const compilerCompileEvents = data.filter(info => info.hookType === WebpackMetaEventType.Compiler_compile);
-    assert(compilerCompileEvents.length === 1, 'webpack must start once');
-    const compilerCompileEvent = compilerCompileEvents[0];
-    const compilerDonwEvents = data.filter(info => info.hookType === WebpackMetaEventType.Compiler_done);
-    assert(compilerDonwEvents.length === 1, 'webpack must done once');
-    const compilerDonwEvent = compilerDonwEvents[0];
+    assert(compilerCompileEvents.length === 1, 'webpack must start only once');
+    const compilerDoneEvents = data.filter(info => info.hookType === WebpackMetaEventType.Compiler_done);
+    assert(compilerDoneEvents.length === 1, 'webpack must done only once');
 
-    const compileTotalTime = compilerDonwEvent.time - compilerCompileEvent.time;
-    console.log(`Webpack compile takes ${prettyTime(compileTotalTime)}`);
+    const messages: string[] = [];
+    const compileTotalTime = compilerDoneEvents[0].time - compilerCompileEvents[0].time;
+    messages.push(`Webpack compile takes ${prettyTime(compileTotalTime, option)}`);
+    return messages;
 }
 
-function outputPluginInfos(data: PluginEventInfo[]) {
-    assert(isSortBy(['time'], data), 'plugin event info should be sorted by time.');
-    console.log(`${chalk.blue(chalk.bold('Plugins'))}`);
+function outputPluginInfos(data: PluginEventInfo[], option: OutputOption) {
+    assert(isArraySortBy(['time'], data), 'plugin event info should be sorted by time.');
+
+    const messages: string[] = [];
+
+    messages.push(`${chalk.blue(chalk.bold('Plugins'))}`);
     let allPluginTime = 0;
     const nameGrouppedPlugin = groupBy(prop('pluginName'), data);
     Object.entries(nameGrouppedPlugin).forEach(([pluginName, dataA]) => {
@@ -202,14 +229,18 @@ function outputPluginInfos(data: PluginEventInfo[]) {
             currentPluginTotalTime += tapTime;
         });
         allPluginTime += currentPluginTotalTime;
-        console.log(`Plugin ${chalk.bold(pluginName)} takes ${prettyTime(currentPluginTotalTime)}`);
+        messages.push(`Plugin ${chalk.bold(pluginName)} takes ${prettyTime(currentPluginTotalTime, option)}`);
     });
-    console.log(`All plugins take ${prettyTime(allPluginTime)}`);
+    messages.push(`All plugins take ${prettyTime(allPluginTime, option)}`);
+    return messages;
 }
 
-function outputLoaderInfos(data: LoaderEventInfo[]) {
-    assert(isSortBy(['time'], data), 'loader event info should be sorted by time.');
-    console.log(`${chalk.blue(chalk.bold('Loaders'))}`);
+function outputLoaderInfos(data: LoaderEventInfo[], option: OutputOption) {
+    assert(isArraySortBy(['time'], data), 'loader event info should be sorted by time.');
+
+    const messages: string[] = [];
+
+    messages.push(`${chalk.blue(chalk.bold('Loaders'))}`);
     let allLoaderTime = 0;
     const nameGrouppedLoader = groupBy(prop('loaderName'), data);
     Object.entries(nameGrouppedLoader).forEach(([loaderName, dataA]) => {
@@ -224,9 +255,10 @@ function outputLoaderInfos(data: LoaderEventInfo[]) {
             currentLoaderTotalTime += tapTime;
         });
         allLoaderTime += currentLoaderTotalTime;
-        console.log(`Loader ${chalk.bold(loaderName)} takes ${prettyTime(currentLoaderTotalTime)}`);
+        messages.push(`Loader ${chalk.bold(loaderName)} takes ${prettyTime(currentLoaderTotalTime, option)}`);
     });
-    console.log(`All loaders take ${prettyTime(allLoaderTime)}`);
+    messages.push(`All loaders take ${prettyTime(allLoaderTime, option)}`);
+    return messages;
 }
 
 export const analyzer = new WebpackTimeAnalyzer();

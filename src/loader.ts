@@ -1,11 +1,10 @@
 /* eslint-disable prefer-rest-params */
 /* eslint-disable @typescript-eslint/no-shadow */
-import chalk from 'chalk';
 import { randomUUID } from 'crypto';
 import path from 'path';
 import type { LoaderDefinition, LoaderDefinitionFunction, PitchLoaderDefinitionFunction } from 'webpack';
 import { AnalyzeInfoKind, analyzer, LoaderEventType, LoaderType } from './analyzer';
-import { PACKAGE_LOADER_PATH, PACKAGE_NAME } from './const';
+import { PACKAGE_NAME } from './const';
 import { assert, now } from './utils';
 
 type WrapLoaderFunction = (origionLoader: LoaderDefinition, loaderAbsolutePath: string) => LoaderDefinition;
@@ -124,7 +123,7 @@ loader.pitch = function () {
                                 resourcePath,
                                 time: now(),
                             });
-                            const asyncResult = arguments[1];
+                            // const asyncResult = arguments[1];
                             // console.log(`Origin loader: ${tmp}'s ${loaderTypeText} loader, async result is \n ${chalk.red(asyncResult)} `);
                             originCallback.apply(this, arguments);
                         };
