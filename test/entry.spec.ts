@@ -66,12 +66,10 @@ describe('Time Analyze Plugin', () => {
 
       const outputFolder = webpackConfig?.output?.path;
 
-      const wrappedWebpackConfig = TimeAnalyticsPlugin.wrap(webpackConfig);
+      const logFilePath = path.join(repoPath, './tmp.log');
 
-      const fileOutputConfig = TimeAnalyticsPlugin.wrap(webpackConfig);
-
-      beforeEach(function clearOutputFoder() {
-        shelljs.rm(outputFolder);
+      const wrappedWebpackConfig = TimeAnalyticsPlugin.wrap(webpackConfig, {
+        outputFile: logFilePath,
       });
 
       it('should be transparent when use TimeAnalyticsPlugin', async () => {
@@ -80,6 +78,11 @@ describe('Time Analyze Plugin', () => {
         await executeWebpack(webpackFunc, wrappedWebpackConfig);
         const warpDistHash = hashOfFolder(outputFolder);
         expect(originDistHash.toString()).to.be.equal(warpDistHash.toString());
+      });
+
+      it('should have a log file if set "outputFile" option', async () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+        expect(existsSync(logFilePath)).to.be.true;
       });
     });
   });
