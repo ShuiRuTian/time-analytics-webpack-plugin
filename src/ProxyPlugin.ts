@@ -4,7 +4,6 @@
 import { randomUUID } from 'crypto';
 import { performance } from 'perf_hooks';
 import type { AsyncHook, Hook, HookMap } from 'tapable';
-import { isSymbolObject } from 'util/types';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { AnalyzeInfoKind, analyzer, PluginEventType, TapType } from './analyzer';
 import { isWebpackPlugin, WebpackPlugin, WebpackPluginLikeFunction } from './TimeAnalyticsPlugin';
@@ -117,7 +116,7 @@ export class ProxyPlugin implements WebpackPlugin {
         function _proxyForHooksWorker(hooks: any) {
             return new Proxy(hooks, {
                 get: function (target, property) {
-                    assert(!isSymbolObject(property), 'Getting Symbol property from "hooks", it should never happen, right?');
+                    assert(typeof property !== 'symbol', 'Getting Symbol property from "hooks", it should never happen, right?');
                     const method = target[property];
                     switch (true) {
                         case isHook(method):
@@ -182,7 +181,7 @@ export class ProxyPlugin implements WebpackPlugin {
         function _proxyForHookWorker(hook: any) {
             return new Proxy(hook, {
                 get: function (target, property) {
-                    assert(!isSymbolObject(property), 'Getting Symbol property from "hook", it should never happen, right?');
+                    assert(typeof property !== 'symbol', 'Getting Symbol property from "hook", it should never happen, right?');
                     if (isIgnoreProperty(target, property)) return target[property];
                     assert(that.knownTapMethodNames.includes(property));
                     const tapMethod = target[property];

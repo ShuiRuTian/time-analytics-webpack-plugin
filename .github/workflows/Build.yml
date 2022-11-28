@@ -1,4 +1,4 @@
-name: Build
+name: Build and Test
 
 on:
   push:
@@ -27,7 +27,6 @@ jobs:
       id: pnpm-install
       with:
         version: 7
-        run_install: false
 
     - name: Install dependency
       run: pnpm install
