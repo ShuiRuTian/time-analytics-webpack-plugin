@@ -1,6 +1,6 @@
 {
   "name": "time-analytics-webpack-plugin",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "analytize the time of each part of webpack",
   "main": "./dist/index.js",
   "types": "./types",
