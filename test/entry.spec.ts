@@ -7,7 +7,6 @@ import shelljs from 'shelljs';
 import { MONOREPO_FOLDER_PATH, PROJ_ROOT_PATH, repoInit } from './util';
 import type { Configuration, webpack } from 'webpack';
 import { expect } from 'chai';
-import { beforeEach } from 'mocha';
 
 const setupMonoTestRepo = (): void => {
   shelljs.pushd();

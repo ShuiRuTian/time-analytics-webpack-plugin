@@ -4,8 +4,8 @@ import { ProxyPlugin } from './ProxyPlugin';
 import { normalizeRules } from './loaderHelper';
 import { assert, assertNever, ConsoleHelper, fail, now } from './utils';
 import './sideEffects/hackWeakMap';
-import { COMPILATION_WEAK_MAP_ID_KEY } from './const';
-import { WebpackCompilationWeakMapId } from './sideEffects/WeakMapIdObject';
+import { WEBPACK_WEAK_MAP_ID_KEY } from './const';
+import { WebpackWeakMapId } from './sideEffects/WeakMapIdObject';
 
 export declare class WebpackPlugin {
     /**
@@ -99,13 +99,26 @@ interface WebpackConfigFactory {
 
 export class TimeAnalyticsPlugin implements WebpackPlugin {
     public apply(compiler: Compiler) {
+
+        // Prepare for custom hooks, which use `compiler` as key
+        // Maybe `environment` or `afterEnvironment` hook? Or wrap the parametere directly?
+        compiler.hooks.initialize.tap({
+            name: TimeAnalyticsPlugin.name,
+            // Make sure to be called fistly
+            stage: -100,
+        }, () => {
+            assert(!(compiler as any)[WEBPACK_WEAK_MAP_ID_KEY], 'add unique id to compilation only once!');
+            (compiler as any)[WEBPACK_WEAK_MAP_ID_KEY] = new WebpackWeakMapId();
+        });
+
+        // Prepare for custom hook, which use `compilation` as key
         compiler.hooks.thisCompilation.tap({
             name: TimeAnalyticsPlugin.name,
             // Make sure to be called fistly
             stage: -100,
         }, (compilation) => {
-            assert(!(compilation as any)[COMPILATION_WEAK_MAP_ID_KEY], 'add unique id to compilation only once!');
-            (compilation as any)[COMPILATION_WEAK_MAP_ID_KEY] = new WebpackCompilationWeakMapId();
+            assert(!(compilation as any)[WEBPACK_WEAK_MAP_ID_KEY], 'add unique id to compilation only once!');
+            (compilation as any)[WEBPACK_WEAK_MAP_ID_KEY] = new WebpackWeakMapId();
         });
 
         compiler.hooks.compile.tap(TimeAnalyticsPlugin.name, () => {
