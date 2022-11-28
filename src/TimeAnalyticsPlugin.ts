@@ -2,7 +2,7 @@ import type { Compiler, Configuration, ModuleOptions, RuleSetRule } from 'webpac
 import { AnalyzeInfoKind, analyzer, WebpackMetaEventType } from './analyzer';
 import { ProxyPlugin } from './ProxyPlugin';
 import { normalizeRules } from './loaderHelper';
-import { assert, ConsoleHelper, fail, now } from './utils';
+import { assert, assertNever, ConsoleHelper, fail, now } from './utils';
 import './sideEffects/hackWeakMap';
 import { COMPILATION_WEAK_MAP_ID_KEY } from './const';
 import { WebpackCompilationWeakMapId } from './sideEffects/WeakMapIdObject';
@@ -20,9 +20,25 @@ interface TimeAnalyticsPluginOptions {
     /**
      * If fase, do nothing
      * 
+     * If true, output all loader and plugin infos.
+     * 
+     * If object, loader and plugin could be turn off.
+     * 
+     * Control loader and plugin with fine grained in `loader` and `plugin` options (not this option)
+     * 
      * @default true
      */
-    enable?: boolean;
+    enable?: boolean | {
+        /**
+         * @default true
+         */
+        loader: boolean,
+        /**
+         * @default true
+         */
+        plugin: boolean,
+    };
+
     /**
      * If provided, write the result to a file.
      * 
@@ -113,6 +129,7 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
                 filePath: this.option?.outputFile,
                 dangerTimeLimit: this.option?.dangerTimeLimit ?? 8000,
                 warnTimeLimit: this.option?.warnTimeLimit ?? 3000,
+                ignoredLoaders: this.option?.loader?.exclude ?? [],
             });
         });
     }
@@ -133,11 +150,37 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
         }
         return wrapConfigurationCore.call(timeAnalyticsPlugin, webpackConfigOrFactory);
     }
+
+    get isLoaderEnabled(): boolean {
+        switch (typeof this.option?.enable) {
+            case 'boolean':
+                return this.option.enable;
+            case 'object':
+                return this.option.enable.loader;
+            case 'undefined':
+                return true;
+            default:
+                fail('TS has a strange error here. We could not use assertNever, use fail instead.');
+        }
+    }
+
+    get isPluginEnabled(): boolean {
+        switch (typeof this.option?.enable) {
+            case 'boolean':
+                return this.option.enable;
+            case 'object':
+                return this.option.enable.plugin;
+            case 'undefined':
+                return true;
+            default:
+                fail('TS has a strange error here. We could not use assertNever, use fail instead.');
+        }
+    }
 }
 
 function wrapConfigurationCore(this: TimeAnalyticsPlugin, config: Configuration): Configuration {
     const newConfig = { ...config };
-    if (newConfig.plugins) {
+    if (this.isPluginEnabled && newConfig.plugins) {
         newConfig.plugins = newConfig.plugins.map((plugin) => {
             const pluginName = plugin.constructor.name;
             if (this.option?.plugin?.exclude?.includes(pluginName)) {
@@ -147,7 +190,7 @@ function wrapConfigurationCore(this: TimeAnalyticsPlugin, config: Configuration)
         });
         newConfig.plugins = [this, ...newConfig.plugins];
     }
-    if (newConfig.optimization?.minimizer) {
+    if (this.isPluginEnabled && newConfig.optimization?.minimizer) {
         newConfig.optimization.minimizer = newConfig.optimization.minimizer
             .map((minimizer) => {
                 const pluginName = minimizer.constructor.name;
@@ -157,7 +200,7 @@ function wrapConfigurationCore(this: TimeAnalyticsPlugin, config: Configuration)
                 return wrapMinimizer(minimizer);
             });
     }
-    if (newConfig.module) {
+    if (this.isLoaderEnabled && newConfig.module) {
         newConfig.module = injectModule(newConfig.module);
     }
     return newConfig;

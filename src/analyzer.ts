@@ -45,6 +45,12 @@ export interface LoaderEventInfo {
      * what does this event stands for, start or end.
      */
     eventType: LoaderEventType;
+    /**
+     * Whether this loader is async loader or sync loader.
+     * 
+     * async loader means this loader calls `this.async()`
+     */
+    isAsync: boolean;
 }
 
 export enum TapType {
@@ -114,6 +120,10 @@ export interface OutputOption {
     filePath?: string;
     warnTimeLimit: number;
     dangerTimeLimit: number;
+    /**
+     * TODO: should we remove this option? Feels like we should not collect the info at all. Do this by give loader options.
+     */
+    ignoredLoaders: string[];
 }
 
 class WebpackTimeAnalyzer {
@@ -234,7 +244,7 @@ function outputPluginInfos(data: PluginEventInfo[], option: OutputOption) {
             assert(dataB.length === 2
                 && dataB[0].eventType === PluginEventType.start
                 && dataB[1].eventType === PluginEventType.end
-                , 'each tap should start once and end once');
+                , 'each tap execution should be collected info for start and end, once and only once.');
             const tapTime = dataB[1].time - dataB[0].time;
             currentPluginTotalTime += tapTime;
         });
@@ -254,13 +264,17 @@ function outputLoaderInfos(data: LoaderEventInfo[], option: OutputOption) {
     let allLoaderTime = 0;
     const nameGrouppedLoader = groupBy(prop('loaderName'), data);
     Object.entries(nameGrouppedLoader).forEach(([loaderName, dataA]) => {
+        if (option.ignoredLoaders.includes(loaderName)) {
+            messages.push(`Loader ${chalk.bold(loaderName)} is ignored.`);
+            return;
+        }
         let currentLoaderTotalTime = 0;
         const idGroupedPlugin = groupBy(prop('callId'), dataA);
         Object.entries(idGroupedPlugin).forEach(([callId, dataB]) => {
             assert(dataB.length === 2
                 && dataB[0].eventType === LoaderEventType.start
                 && dataB[1].eventType === LoaderEventType.end
-                , 'each tap should start once and end once');
+                , `each laoder execution should be collected info for start and end, once and only once. But for ${loaderName}, there is an error, why?`);
             const tapTime = dataB[1].time - dataB[0].time;
             currentLoaderTotalTime += tapTime;
         });

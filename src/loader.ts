@@ -122,6 +122,7 @@ loader.pitch = function () {
                                 loaderPath: path,
                                 resourcePath,
                                 time: now(),
+                                isAsync: !isSync,
                             });
                             // const asyncResult = arguments[1];
                             // console.log(`Origin loader: ${tmp}'s ${loaderTypeText} loader, async result is \n ${chalk.red(asyncResult)} `);
@@ -139,6 +140,7 @@ loader.pitch = function () {
                     loaderPath: path,
                     resourcePath,
                     time: now(),
+                    isAsync: !isSync,
                 });
 
                 const ret = originLoader.apply(almostThis, arguments);
@@ -161,6 +163,7 @@ loader.pitch = function () {
                     loaderPath: path,
                     resourcePath,
                     time: now(),
+                    isAsync: !isSync,
                 });
                 return ret;
             };
