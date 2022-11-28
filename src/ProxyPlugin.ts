@@ -90,10 +90,17 @@ export class ProxyPlugin implements WebpackPlugin {
                 get: (target, property) => {
                     if (property === 'hooks') {
                         const originHooks = target[property];
-                        assert(Object.isFrozen(originHooks), 'webpack frozens all `hooks` by defualt');
+                        // Webpack 4 not freeze the hooks, but Webpack 5 freeze
                         assert(originHooks.constructor.name === 'Object', '`Hooks` should just be plain object');
-                        const unfrozenHooks = { ...originHooks };
-                        return that._proxyForHooks(unfrozenHooks, [hooksProvider.constructor.name, property]);
+                        let hookObject;
+                        if (Object.isFrozen(originHooks)) {
+                            hookObject = { ...originHooks };
+                        } else {
+                            // TODO: remove this support
+                            ConsoleHelper.warn('You are using Webpack 4 and Time Analyzer Plugin together. However, this plugin is designed for Webpack 5.');
+                            hookObject = originHooks;
+                        }
+                        return that._proxyForHooks(hookObject, [hooksProvider.constructor.name, property]);
                     }
                     return target[property];
                 },
