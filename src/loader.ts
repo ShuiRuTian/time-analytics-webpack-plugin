@@ -100,9 +100,10 @@ loader.pitch = function () {
             // return originLoader;
             const uuid = randomUUID();
 
-            const loaderTypeText = loaderType === LoaderType.pitch ? 'pitch' : 'normal';
-            const wrappedLoader = function wrappedLoaderFunc() {
-                const tmp = loaderName;
+            // const loaderTypeText = loaderType === LoaderType.pitch ? 'pitch' : 'normal';
+
+            const wrappedLoader: LoaderDefinitionFunction | PitchLoaderDefinitionFunction = function wrappedLoaderFunc(this: any) {
+                // const tmp = loaderName;
                 // console.log(`Wrapped loader: ${tmp}'s ${loaderTypeText} function is executed.`);
                 // console.log('origin loader is ', originLoader);
                 let isSync = true;
@@ -112,7 +113,7 @@ loader.pitch = function () {
                         isSync = false;
                         const originCallback = this.async(arguments);
 
-                        return function () {
+                        return function (this: any) {
                             analyzerInstance.collectLoaderInfo({
                                 callId: uuid,
                                 loaderName,
@@ -143,6 +144,7 @@ loader.pitch = function () {
                     isAsync: !isSync,
                 });
 
+                // @ts-ignore, normal loader and pitch loader is kind of different, but we do not care.
                 const ret = originLoader.apply(almostThis, arguments);
 
                 // if it's an async loader, we return `undefined`, as webpack request
@@ -167,8 +169,8 @@ loader.pitch = function () {
                 });
                 return ret;
             };
-            wrappedLoader.__origional_loader = originLoader;
-            wrappedLoader.__origional_loader_type = loaderTypeText;
+            // wrappedLoader.__origional_loader = originLoader;
+            // wrappedLoader.__origional_loader_type = loaderTypeText;
             return wrappedLoader;
         };
 
