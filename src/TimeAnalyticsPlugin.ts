@@ -61,12 +61,20 @@ interface TimeAnalyticsPluginOptions {
     dangerTimeLimit?: number;
     loader?: {
         /**
-         * If true, output the absolute path of the loader
+         * If true, output the absolute path of the loader.
+         * 
+         * By default, the plugin displays loader time by a assumed loader name
+         * 
+         * Like `babel-loader takes xxx ms.`
+         * 
+         * The assumption is the loader's name is the first name after the last `node_modules` in the path. 
+         * 
+         * However, sometimes, it's not correct, like the loader's package is `@foo/loader1` then the assumed name is "@foo", 
+         * or some framework like `next` will move the loader to some strange place.
          * 
          * @default false
-         * @NotImplementYet
          */
-        displayAbsolutePath?: boolean;
+        groupedByAbsolutePath?: boolean;
         /**
          * If true, display the most time consumed resource's info
          * 
@@ -145,6 +153,7 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
                 dangerTimeLimit: this.option?.dangerTimeLimit ?? 8000,
                 warnTimeLimit: this.option?.warnTimeLimit ?? 3000,
                 ignoredLoaders: this.option?.loader?.exclude ?? [],
+                groupLoaderByPath: this.option?.loader?.groupedByAbsolutePath ?? false,
             });
         });
     }

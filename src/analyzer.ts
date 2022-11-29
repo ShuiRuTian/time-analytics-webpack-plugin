@@ -4,6 +4,7 @@ import { EOL } from 'os';
 import { resolve } from 'path';
 import { curry, groupBy, path, prop } from 'ramda';
 import { PACKAGE_NAME } from './const';
+import { getLoaderName } from './loaderHelper';
 import { assert, fail } from './utils';
 
 export enum AnalyzeInfoKind {
@@ -35,7 +36,6 @@ export interface LoaderEventInfo {
      * the absolute path to the loader
      */
     loaderPath: string;
-    loaderName: string;
     time: number;
     /**
      * source file that the loader is handling
@@ -120,6 +120,7 @@ export interface OutputOption {
     filePath?: string;
     warnTimeLimit: number;
     dangerTimeLimit: number;
+    groupLoaderByPath: boolean;
     /**
      * TODO: should we remove this option? Feels like we should not collect the info at all. Do this by give loader options.
      */
@@ -215,6 +216,9 @@ function isArraySortBy<T>(paths: string[], arr: T[]) {
     return true;
 }
 
+const sectionStartPrefix = '├── ';
+const nextLinePrefix = '│ ';
+
 function outputMetaInfo(data: WebpackMetaEventInfo[], option: OutputOption) {
     // validate
     assert(isArraySortBy(['time'], data), 'webpack meta event info should be sorted by time.');
@@ -225,7 +229,7 @@ function outputMetaInfo(data: WebpackMetaEventInfo[], option: OutputOption) {
 
     const messages: string[] = [];
     const compileTotalTime = compilerDoneEvents[0].time - compilerCompileEvents[0].time;
-    messages.push(`Webpack compile takes ${prettyTime(compileTotalTime, option)}`);
+    messages.push(`${nextLinePrefix}Webpack compile takes ${prettyTime(compileTotalTime, option)}`);
     return messages;
 }
 
@@ -234,7 +238,7 @@ function outputPluginInfos(data: PluginEventInfo[], option: OutputOption) {
 
     const messages: string[] = [];
 
-    messages.push(`${chalk.blue(chalk.bold('Plugins'))}`);
+    messages.push(`${sectionStartPrefix}${chalk.blue(chalk.bold('Plugins'))}`);
     let allPluginTime = 0;
     const nameGrouppedPlugin = groupBy(prop('pluginName'), data);
     Object.entries(nameGrouppedPlugin).forEach(([pluginName, dataA]) => {
@@ -249,23 +253,26 @@ function outputPluginInfos(data: PluginEventInfo[], option: OutputOption) {
             currentPluginTotalTime += tapTime;
         });
         allPluginTime += currentPluginTotalTime;
-        messages.push(`Plugin ${chalk.bold(pluginName)} takes ${prettyTime(currentPluginTotalTime, option)}`);
+        messages.push(`${nextLinePrefix}Plugin ${chalk.bold(pluginName)} takes ${prettyTime(currentPluginTotalTime, option)}`);
     });
-    messages.push(`All plugins take ${prettyTime(allPluginTime, option)}`);
+    messages.push(`${nextLinePrefix}All plugins take ${prettyTime(allPluginTime, option)}`);
     return messages;
 }
-
 function outputLoaderInfos(data: LoaderEventInfo[], option: OutputOption) {
     assert(isArraySortBy(['time'], data), 'loader event info should be sorted by time.');
 
     const messages: string[] = [];
 
-    messages.push(`${chalk.blue(chalk.bold('Loaders'))}`);
+    const loaderIdSet = new Set<string>();
+    let isDuplicatedLodaerIdOutputed = false;
+
+    messages.push(`${sectionStartPrefix}${chalk.blue(chalk.bold('Loaders'))}`);
     let allLoaderTime = 0;
-    const nameGrouppedLoader = groupBy(prop('loaderName'), data);
-    Object.entries(nameGrouppedLoader).forEach(([loaderName, dataA]) => {
-        if (option.ignoredLoaders.includes(loaderName)) {
-            messages.push(`Loader ${chalk.bold(loaderName)} is ignored.`);
+    const nameGrouppedLoader = groupBy(prop('loaderPath'), data);
+    Object.entries(nameGrouppedLoader).forEach(([loaderPath, dataA]) => {
+        const loaderName = getLoaderName(loaderPath);
+        if (option.ignoredLoaders.includes(loaderPath)) {
+            messages.push(`${nextLinePrefix}Loader ${chalk.bold(loaderPath)} is ignored.`);
             return;
         }
         let currentLoaderTotalTime = 0;
@@ -274,14 +281,22 @@ function outputLoaderInfos(data: LoaderEventInfo[], option: OutputOption) {
             assert(dataB.length === 2
                 && dataB[0].eventType === LoaderEventType.start
                 && dataB[1].eventType === LoaderEventType.end
-                , `each laoder execution should be collected info for start and end, once and only once. But for ${loaderName}, there is an error, why?`);
+                , `each laoder execution should be collected info for start and end, once and only once. But for ${loaderPath}, there is an error, why?`);
             const tapTime = dataB[1].time - dataB[0].time;
             currentLoaderTotalTime += tapTime;
         });
         allLoaderTime += currentLoaderTotalTime;
-        messages.push(`Loader ${chalk.bold(loaderName)} takes ${prettyTime(currentLoaderTotalTime, option)}`);
+        const loaderId = option.groupLoaderByPath ? loaderPath : loaderName;
+        if (loaderIdSet.has(loaderId)) {
+            isDuplicatedLodaerIdOutputed = true;
+        }
+        loaderIdSet.add(loaderId);
+        messages.push(`${nextLinePrefix}Loader ${chalk.bold(loaderId)} takes ${prettyTime(currentLoaderTotalTime, option)}`);
     });
-    messages.push(`All loaders take ${prettyTime(allLoaderTime, option)}`);
+    if (isDuplicatedLodaerIdOutputed) {
+        messages.push(`${nextLinePrefix}There are many differnt loaders that have same assumed name. Consider use "loader.groupedByAbsolutePath" option to show the full path of loaders.`);
+    }
+    messages.push(`${nextLinePrefix}All loaders take ${prettyTime(allLoaderTime, option)}`);
     return messages;
 }
 

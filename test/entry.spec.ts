@@ -69,6 +69,9 @@ describe('Time Analyze Plugin', () => {
 
       const wrappedWebpackConfig = TimeAnalyticsPlugin.wrap(webpackConfig, {
         outputFile: logFilePath,
+        loader: {
+          groupedByAbsolutePath: true,
+        },
       });
 
       it('should be transparent when use TimeAnalyticsPlugin', async () => {

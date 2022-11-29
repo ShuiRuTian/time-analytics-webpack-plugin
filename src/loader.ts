@@ -61,18 +61,6 @@ function hackWrapLoaderModule(loaderPaths: string[], wrapLoaderModuleCallback: W
     Module.prototype.require = wrapRequire(originModuleRequire);
 }
 
-function getLoaderName(path: string) {
-    // get the folder name after the last "node_moduels"
-    // otherwise, the whole path
-    const canonicalPath = path.replace(/\\/g, '/');
-    const targetString = '/node_modules/';
-    const index = canonicalPath.lastIndexOf(targetString);
-    if (index === -1) return canonicalPath;
-    const sub = canonicalPath.substring(index + targetString.length);
-    const loaderName = sub.substring(0, sub.indexOf('/'));
-    return loaderName;
-}
-
 const loader: LoaderDefinition = function timeAnalyticHackLoader(source) {
     // console.log('Time analytics plugin: normal loader is executed');
     return source;
@@ -95,7 +83,6 @@ loader.pitch = function () {
     // loadLoaders
     // `loaderModule` means the cjs or mjs module
     hackWrapLoaderModule(loaderPaths, function wrapLoaderModuleCallback(loaderModule, path) {
-        const loaderName = getLoaderName(path);
         const wrapLoaderFunc = (originLoader: LoaderDefinitionFunction | PitchLoaderDefinitionFunction, loaderType: LoaderType) => {
             // return originLoader;
             const uuid = randomUUID();
@@ -116,7 +103,6 @@ loader.pitch = function () {
                         return function (this: any) {
                             analyzerInstance.collectLoaderInfo({
                                 callId: uuid,
-                                loaderName,
                                 kind: AnalyzeInfoKind.loader,
                                 eventType: LoaderEventType.end,
                                 loaderType,
@@ -134,7 +120,6 @@ loader.pitch = function () {
 
                 analyzerInstance.collectLoaderInfo({
                     callId: uuid,
-                    loaderName,
                     kind: AnalyzeInfoKind.loader,
                     eventType: LoaderEventType.start,
                     loaderType,
@@ -158,7 +143,6 @@ loader.pitch = function () {
 
                 analyzerInstance.collectLoaderInfo({
                     callId: uuid,
-                    loaderName,
                     kind: AnalyzeInfoKind.loader,
                     eventType: LoaderEventType.end,
                     loaderType,

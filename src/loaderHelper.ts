@@ -2,6 +2,18 @@ import type { RuleSetRule } from 'webpack';
 import { PACKAGE_NAME } from './const';
 import { fail } from './utils';
 
+export function getLoaderName(path: string) {
+    // get the folder name after the last "node_moduels"
+    // otherwise, the whole path
+    const canonicalPath = path.replace(/\\/g, '/');
+    const targetString = '/node_modules/';
+    const index = canonicalPath.lastIndexOf(targetString);
+    if (index === -1) return canonicalPath;
+    const sub = canonicalPath.substring(index + targetString.length);
+    const loaderName = sub.substring(0, sub.indexOf('/'));
+    return loaderName;
+}
+
 function normalizeRuleCore(rule: RuleSetRule) {
     if (rule.loader) {
         rule.use = [rule.loader];
