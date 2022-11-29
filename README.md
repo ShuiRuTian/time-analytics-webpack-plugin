@@ -1,7 +1,7 @@
 # time-analytics-webpack-plugin
 Profiling is the base of optimise.
 
-This plugin is still in an pretty early eage, the API is not forzen and might be changed.
+This plugin is still in an early eage, the API is not forzen and might be changed.
 
 Consider about this, maybe you want to enable type-check so that you could know the option is changed.
 ## How to use it
