@@ -4,7 +4,7 @@ importers:
 
   .:
     specifiers:
-      '@tsconfig/recommended': ^1.0.1
+      '@tsconfig/node14': ^1.0.1
       '@typescript-eslint/eslint-plugin': ^5.35.1
       '@typescript-eslint/parser': ^5.35.1
       eslint: ^8.23.0
@@ -14,7 +14,7 @@ importers:
       typescript: ^4.7.0
       webpack: ^5.75.0
     devDependencies:
-      '@tsconfig/recommended': 1.0.1
+      '@tsconfig/node14': 1.0.3
       '@typescript-eslint/eslint-plugin': 5.43.0_yy4vf4gcvxiubmg7fqa55dqe2i
       '@typescript-eslint/parser': 5.43.0_rmayb2veg2btbq6mbmnyivgasy
       eslint: 8.27.0
@@ -161,7 +161,7 @@ packages:
     resolution: {integrity: sha1-7j3vHyfZ7WbaxuRqKVz/sBUuBY0=}
 
   /@tsconfig/node14/1.0.3:
-    resolution: {integrity: sha1-5DhjFihPALmENb9A9y91oJ2r9sE=}
+    resolution: {integrity: sha512-ysT8mhdixWK6Hw3i1V2AeRqZ5WfXg1G43mqoYlM2nc6388Fq5jcXyr5mRsqViLx/GJYdoL0bfXD8nmF+Zn/Iow==}
 
   /@tsconfig/node16/1.0.3:
     resolution: {integrity: sha1-Ry6qtfFcH/3X+GKL1MT3U5lex54=}

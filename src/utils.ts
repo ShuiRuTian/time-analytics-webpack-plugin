@@ -1,4 +1,5 @@
 import { PACKAGE_NAME } from './const';
+import { performance } from 'perf_hooks';
 
 /**
  * Add prefix "[time-analytics-webpack-plugin]: " prefix to all meesages
