@@ -2,12 +2,11 @@
 /* eslint-disable @typescript-eslint/no-shadow */ // could not come up with that many name
 /* eslint-disable @typescript-eslint/naming-convention */ // use _ as private field name
 import { randomUUID } from 'crypto';
-import { performance } from 'perf_hooks';
 import type { AsyncHook, Hook, HookMap } from 'tapable';
 import type { Compiler, WebpackPluginInstance } from 'webpack';
 import { AnalyzeInfoKind, analyzer, PluginEventType, TapType } from './analyzer';
 import { isWebpackPlugin, WebpackPlugin, WebpackPluginLikeFunction } from './TimeAnalyticsPlugin';
-import { assert, ConsoleHelper, fail, isConstructorNameInPrototypeChain } from './utils';
+import { assert, ConsoleHelper, fail, isConstructorNameInPrototypeChain, now } from './utils';
 
 type Tap = Hook<any, any>['tap'];
 type TapAsync = AsyncHook<any, any>['tapAsync'];
@@ -22,6 +21,10 @@ type TapPromiseCallback = Parameters<TapPromise>[1];
  * For example, in `a.b.c.d`, `b` is the first proxied object, then for d, it's
  */
 type PropertyTrackPaths = string[];
+
+// TODO: remove webpack 4 support
+let isWebpack4WarnLogged = false;
+
 
 export class ProxyPlugin implements WebpackPlugin {
     private _proxiedPlugin: WebpackPlugin | WebpackPluginLikeFunction;
@@ -78,8 +81,6 @@ export class ProxyPlugin implements WebpackPlugin {
         return this._proxyForHooksProvider(candidate);
     }
 
-    // TODO: remove webpack 4 support
-    private isWebpack4WarnLogged = false;
 
     private _proxyForHooksProvider(
         hooksProvider: any, // @types/webpack does not export all the types. Use `any` for now.
@@ -99,9 +100,9 @@ export class ProxyPlugin implements WebpackPlugin {
                             hookObject = { ...originHooks };
                         } else {
                             // TODO: remove this support
-                            if (!that.isWebpack4WarnLogged) {
+                            if (!isWebpack4WarnLogged) {
                                 ConsoleHelper.warn('It seems you are using Webpack 4. However, this plugin is designed for Webpack 5.');
-                                that.isWebpack4WarnLogged = true;
+                                isWebpack4WarnLogged = true;
                             }
                             hookObject = originHooks;
                         }
@@ -285,7 +286,7 @@ function wrapTapCallback(this: ProxyPlugin, tapCallback: TapCallback): TapCallba
             kind: AnalyzeInfoKind.plugin,
             eventType: PluginEventType.start,
             pluginName,
-            time: performance.now(),
+            time: now(),
             tapCallId: uuid,
             tapType: TapType.normal,
         });
@@ -294,7 +295,7 @@ function wrapTapCallback(this: ProxyPlugin, tapCallback: TapCallback): TapCallba
             kind: AnalyzeInfoKind.plugin,
             eventType: PluginEventType.end,
             pluginName,
-            time: performance.now(),
+            time: now(),
             tapCallId: uuid,
             tapType: TapType.normal,
         });
@@ -314,7 +315,7 @@ function wrapTapAsyncCallback(this: ProxyPlugin, tapCallback: TapAsyncCallback):
             kind: AnalyzeInfoKind.plugin,
             eventType: PluginEventType.start,
             pluginName,
-            time: performance.now(),
+            time: now(),
             tapCallId: uuid,
             tapType: TapType.async,
         });
@@ -323,7 +324,7 @@ function wrapTapAsyncCallback(this: ProxyPlugin, tapCallback: TapAsyncCallback):
                 kind: AnalyzeInfoKind.plugin,
                 eventType: PluginEventType.end,
                 pluginName,
-                time: performance.now(),
+                time: now(),
                 tapCallId: uuid,
                 tapType: TapType.async,
             });
@@ -344,7 +345,7 @@ function wrapTapPromiseCallback(this: ProxyPlugin, tapCallback: TapPromiseCallba
             eventType: PluginEventType.start,
             kind: AnalyzeInfoKind.plugin,
             pluginName,
-            time: performance.now(),
+            time: now(),
             tapCallId: uuid,
             tapType: TapType.promise,
         });
@@ -354,7 +355,7 @@ function wrapTapPromiseCallback(this: ProxyPlugin, tapCallback: TapPromiseCallba
                 eventType: PluginEventType.end,
                 kind: AnalyzeInfoKind.plugin,
                 pluginName,
-                time: performance.now(),
+                time: now(),
                 tapCallId: uuid,
                 tapType: TapType.promise,
             });

@@ -1,6 +1,9 @@
 # time-analytics-webpack-plugin
 Profiling is the base of optimise.
 
+This plugin is still in an pretty early eage, the API is not forzen and might be changed.
+
+Consider about this, maybe you want to enable type-check so that you could know the option is changed.
 ## How to use it
 Wrap the config, and use the wrapped config.
 
@@ -35,6 +38,8 @@ Lowlight:
         - Maybe check normailzed configutation, does webpcak add all plugins at this time?
     - If one plugin adds more plugins internally, the added plugin will be ignored.
 
+2. thread-loader is confused, I do see internal babel-loader rarely, but usually it's not in the output. However, if we not hack Compiler for custom hooks, it seems we could measure the internal loaders. Pretty interesting, but need time to investigate.
+
 ## How does it work?
 To measure time, we must know when the loader/plugins starts and ends.
 
@@ -46,14 +51,13 @@ For loaders, the webpack will import the loader's module each time it's used. So
 
 For plugins, we wrap the plugin with a custom plugin, which will create proxy for most of property of the compiler passed into.
 
-### Some details
+### Custom hooks
 In `speed-measure-webpack-plugin`, when using `mini-css-extract-plugin`, there is a strange error which is like "the plugin is not called".
 The reason is the mini-css-extract-plugin's plugin will add a unique symbol to compilation object, and in the pitch loader of mini-css-extract-plugin, it will check the symbol.
 Seems pretty reasonable! However, webpack is using a reference equal map in `getCompilationHooks`. But we are using Proxy to take over everything, the reference of a proxy is not the same as the origin target.
 
 So how to resolve it?
-1. Webpack could give each compilation a unique ID, then use the id as key.
-2. Use defineProperty rather than proxy
+We hack the `WeakMap`, when the key is `Compiler` or `Compilation`, we  will add a obejct and use that key object instead.
 
 ## Thanks
 `speed-measure-webpack-plugin`. An awesome plugin, which inspires this repo.
