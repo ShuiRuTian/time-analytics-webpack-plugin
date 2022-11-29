@@ -100,26 +100,30 @@ interface WebpackConfigFactory {
 export class TimeAnalyticsPlugin implements WebpackPlugin {
     public apply(compiler: Compiler) {
 
+        // Here is already too late, webpack uses weakMap internally in the constructor of Compiler.
+        // Do this hack in WeakMap hack now.
+        // #region Custom_Hooks
         // Prepare for custom hooks, which use `compiler` as key
         // Maybe `environment` or `afterEnvironment` hook? Or wrap the parametere directly?
-        compiler.hooks.initialize.tap({
-            name: TimeAnalyticsPlugin.name,
-            // Make sure to be called fistly
-            stage: -100,
-        }, () => {
-            assert(!(compiler as any)[WEBPACK_WEAK_MAP_ID_KEY], 'add unique id to compilation only once!');
-            (compiler as any)[WEBPACK_WEAK_MAP_ID_KEY] = new WebpackWeakMapId();
-        });
+        // compiler.hooks.initialize.tap({
+        //     name: TimeAnalyticsPlugin.name,
+        //     // Make sure to be called fistly
+        //     stage: -100,
+        // }, () => {
+        //     assert(!(compiler as any)[WEBPACK_WEAK_MAP_ID_KEY], 'add unique id to compilation only once!');
+        //     (compiler as any)[WEBPACK_WEAK_MAP_ID_KEY] = new WebpackWeakMapId();
+        // });
 
         // Prepare for custom hook, which use `compilation` as key
-        compiler.hooks.thisCompilation.tap({
-            name: TimeAnalyticsPlugin.name,
-            // Make sure to be called fistly
-            stage: -100,
-        }, (compilation) => {
-            assert(!(compilation as any)[WEBPACK_WEAK_MAP_ID_KEY], 'add unique id to compilation only once!');
-            (compilation as any)[WEBPACK_WEAK_MAP_ID_KEY] = new WebpackWeakMapId();
-        });
+        // compiler.hooks.thisCompilation.tap({
+        //     name: TimeAnalyticsPlugin.name,
+        //     // Make sure to be called fistly
+        //     stage: -100,
+        // }, (compilation) => {
+        //     assert(!(compilation as any)[WEBPACK_WEAK_MAP_ID_KEY], 'add unique id to compilation only once!');
+        //     (compilation as any)[WEBPACK_WEAK_MAP_ID_KEY] = new WebpackWeakMapId();
+        // });
+        // #endregion Custom_Hooks
 
         compiler.hooks.compile.tap(TimeAnalyticsPlugin.name, () => {
             analyzer.initilize();
