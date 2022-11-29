@@ -1,5 +1,5 @@
 import type { RuleSetRule } from 'webpack';
-import { PACKAGE_LOADER_PATH, PACKAGE_NAME } from './const';
+import { PACKAGE_NAME } from './const';
 import { fail } from './utils';
 
 function normalizeRuleCore(rule: RuleSetRule) {
@@ -18,7 +18,8 @@ function normalizeRuleCore(rule: RuleSetRule) {
         }
         if (!Array.isArray(rule.use)) rule.use = [rule.use];
         // Inject into the first one, so that our loader's pitch function is always called at first.
-        rule.use.unshift(PACKAGE_LOADER_PATH);
+        const loaderPath = require.resolve('./loader', { paths: [__dirname] });
+        rule.use.unshift(loaderPath);
     }
 
     if (rule.oneOf) {

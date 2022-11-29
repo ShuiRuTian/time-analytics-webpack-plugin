@@ -78,6 +78,9 @@ export class ProxyPlugin implements WebpackPlugin {
         return this._proxyForHooksProvider(candidate);
     }
 
+    // TODO: remove webpack 4 support
+    private isWebpack4WarnLogged = false;
+
     private _proxyForHooksProvider(
         hooksProvider: any, // @types/webpack does not export all the types. Use `any` for now.
     ) {
@@ -96,7 +99,10 @@ export class ProxyPlugin implements WebpackPlugin {
                             hookObject = { ...originHooks };
                         } else {
                             // TODO: remove this support
-                            ConsoleHelper.warn('You are using Webpack 4 and Time Analyzer Plugin together. However, this plugin is designed for Webpack 5.');
+                            if (!that.isWebpack4WarnLogged) {
+                                ConsoleHelper.warn('It seems you are using Webpack 4. However, this plugin is designed for Webpack 5.');
+                                that.isWebpack4WarnLogged = true;
+                            }
                             hookObject = originHooks;
                         }
                         return that._proxyForHooks(hookObject, [hooksProvider.constructor.name, property]);
