@@ -11,14 +11,14 @@ const originGet = WeakMap.prototype.get;
  * Whether one object is `Compiler` in webpack
  */
 function isCompiler(obj: any) {
-    return obj.constructor.name === 'Compiler';
+    return obj?.constructor?.name === 'Compiler';
 }
 
 /**
  * Whether one object is `Compilation` in webpack
  */
 function isCompilation(obj: any) {
-    return obj.constructor.name === 'Compilation';
+    return obj?.constructor?.name === 'Compilation';
 }
 
 function GetOrAddHackKeyFor(key: any) {
