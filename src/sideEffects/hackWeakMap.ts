@@ -1,6 +1,15 @@
+import { randomUUID } from 'crypto';
 import { WEBPACK_WEAK_MAP_ID_KEY } from '../const';
 import { assert } from '../utils';
-import { WebpackWeakMapId } from './WeakMapIdObject';
+
+/**
+ * The object which will be used as the key of WeakMap for compilation/compiler.
+ * 
+ * Need this, because WeakMap only accepts key as object.
+ */
+class WebpackWeakMapId {
+    private id = randomUUID();
+}
 
 assert(WeakMap, 'WeakMap must be existed.');
 

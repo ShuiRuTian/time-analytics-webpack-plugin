@@ -2,10 +2,8 @@ import type { Compiler, Configuration, ModuleOptions, RuleSetRule } from 'webpac
 import { AnalyzeInfoKind, analyzer, WebpackMetaEventType } from './analyzer';
 import { ProxyPlugin } from './ProxyPlugin';
 import { normalizeRules } from './loaderHelper';
-import { assert, assertNever, ConsoleHelper, fail, now } from './utils';
+import { ConsoleHelper, fail, now } from './utils';
 import './sideEffects/hackWeakMap';
-import { WEBPACK_WEAK_MAP_ID_KEY } from './const';
-import { WebpackWeakMapId } from './sideEffects/WeakMapIdObject';
 
 export declare class WebpackPlugin {
     /**
