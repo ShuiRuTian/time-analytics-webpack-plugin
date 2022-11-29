@@ -51,12 +51,16 @@ For loaders, the webpack will import the loader's module each time it's used. So
 
 For plugins, we wrap the plugin with a custom plugin, which will create proxy for most of property of the compiler passed into.
 
-### Custom hooks
+For custom hooks in plugins:
+
 In `speed-measure-webpack-plugin`, when using `mini-css-extract-plugin`, there is a strange error which is like "the plugin is not called".
+
 The reason is the mini-css-extract-plugin's plugin will add a unique symbol to compilation object, and in the pitch loader of mini-css-extract-plugin, it will check the symbol.
+
 Seems pretty reasonable! However, webpack is using a reference equal map in `getCompilationHooks`. But we are using Proxy to take over everything, the reference of a proxy is not the same as the origin target.
 
 So how to resolve it?
+
 We hack the `WeakMap`, when the key is `Compiler` or `Compilation`, we  will add a obejct and use that key object instead.
 
 ## Thanks
@@ -64,22 +68,28 @@ We hack the `WeakMap`, when the key is `Compiler` or `Compilation`, we  will add
 
 ## Q&A
 1. why `mocha` rather than `jest`?
+
 jest mocks "require" and not use the default `require`(maybe it use cache).
+
 However, we need to mock `require` to do some tricks to loaders.
 
 1. why monorepo?
+
 To test the source code just like the real case.
 
 1. why publish ts source file?
+
 So it would be easier to debug. It's not a big deal to download a bit more files when they will not appear in production code.
 
 ## Questions
 1. In which condition, will `this.callback()` called? The doc says for multiple results, but it's kind of confused.
 
 3. For ts
+```ts
 class A{
     static foo(){
         hello.call(this); // no error, this is a bug? Because in static method, `this` should be the class itself("typeof A") rather than the class instance.
     }
 }
 function hello(this:A){}
+```
