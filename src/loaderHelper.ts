@@ -1,10 +1,11 @@
 import type { RuleSetRule } from 'webpack';
 import { PACKAGE_NAME } from './const';
 import { fail } from './utils';
-
+/**
+ * get the folder name after the last "node_moduels"
+ * otherwise, the whole path
+ */
 export function getLoaderName(path: string) {
-    // get the folder name after the last "node_moduels"
-    // otherwise, the whole path
     const canonicalPath = path.replace(/\\/g, '/');
     const targetString = '/node_modules/';
     const index = canonicalPath.lastIndexOf(targetString);

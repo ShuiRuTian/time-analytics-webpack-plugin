@@ -168,7 +168,7 @@ class WebpackTimeAnalyzer {
         const messages1 = outputMetaInfo(this.metaData, option);
         const messages2 = outputPluginInfos(this.pluginData, option);
         const messages3 = outputLoaderInfos(this.loaderData, option);
-        const content = [...messages1, ...messages2, ...messages3].join(EOL);
+        const content = [headerText, ...messages1, ...messages2, ...messages3].join(EOL);
         if (option.filePath) {
             const outputFileAbsolutePath = resolve(option.filePath);
             console.log(`[${PACKAGE_NAME}]: try to write file to file "${outputFileAbsolutePath}"`);
@@ -216,6 +216,7 @@ function isArraySortBy<T>(paths: string[], arr: T[]) {
     return true;
 }
 
+const headerText = '┌── time-analytics-webpack-plugin';
 const sectionStartPrefix = '├── ';
 const nextLinePrefix = '│ ';
 
