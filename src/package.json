@@ -13,7 +13,6 @@
     "webpack": "^5"
   },
   "devDependencies": {
-    "@tsconfig/recommended": "^1.0.1",
     "@types/node": "^16.11.56",
     "@types/tapable": "^2.2.2",
     "@types/ramda": "^0.28.20"

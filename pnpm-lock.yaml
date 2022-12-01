@@ -26,7 +26,6 @@ importers:
 
   src:
     specifiers:
-      '@tsconfig/recommended': ^1.0.1
       '@types/node': ^16.11.56
       '@types/ramda': ^0.28.20
       '@types/tapable': ^2.2.2
@@ -36,7 +35,6 @@ importers:
       chalk: registry.npmmirror.com/chalk/4.1.2
       ramda: registry.npmmirror.com/ramda/0.28.0
     devDependencies:
-      '@tsconfig/recommended': 1.0.1
       '@types/node': 16.18.3
       '@types/ramda': registry.npmmirror.com/@types/ramda/0.28.20
       '@types/tapable': 2.2.2
@@ -165,10 +163,6 @@ packages:
 
   /@tsconfig/node16/1.0.3:
     resolution: {integrity: sha1-Ry6qtfFcH/3X+GKL1MT3U5lex54=}
-
-  /@tsconfig/recommended/1.0.1:
-    resolution: {integrity: sha1-dhm605fgbq0cUYKSbJRODKYXf1I=}
-    dev: true
 
   /@types/chai/4.3.4:
     resolution: {integrity: sha512-KnRanxnpfpjUTqTCXslZSEdLfXExwgNxYPdiO2WGUj8+HDjFi8R3k5RVKPeSCzLjCcshCAtVO2QBbVuAV4kTnw==}
