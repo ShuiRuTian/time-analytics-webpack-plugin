@@ -4,6 +4,7 @@ Profiling is the base of optimise.
 This plugin is still in an early eage, the API is not forzen and might be changed.
 
 Consider about this, maybe you want to enable type-check so that you could know the option is changed.
+
 ## How to use it
 Wrap the config, and use the wrapped config.
 
@@ -17,6 +18,24 @@ const wrappedWebpackConfig = TimeAnalyticsPlugin.wrap(webpackConfig,{ /* options
 Or wrap a function that will return a configuration
 ```ts
 const wrappedWebpackConfigFactory = TimeAnalyticsPlugin.wrap(webpackConfigFactory);
+```
+
+## Output
+By default, the result will be logged into console, but it's able to set the options to make it write to some file.
+
+```
+┌── time-analytics-webpack-plugin
+│ Webpack compile takes 212.00251600146294ms
+├── Plugins
+│ Plugin TerserPlugin takes 257.66442596912384ms
+│ Plugin MiniCssExtractPlugin takes 1.021947979927063ms
+│ Plugin DefinePlugin takes 0.03626999258995056ms
+│ All plugins take 258.72264394164085ms
+├── Loaders
+│ Loader babel-loader takes 161.88674998283386ms
+│ Loader mini-css-extract-plugin takes 190.57009398937225ms
+│ Loader css-loader takes 12.007494986057281ms
+│ All loaders take 364.4643389582634ms
 ```
 
 ## What is the difference with speed-measure-webpack-plugin?
