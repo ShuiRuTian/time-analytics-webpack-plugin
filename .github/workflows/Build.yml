@@ -22,5 +22,17 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - uses: ./.github/actions/set-environment
-    - uses: ./.github/actions/build-and-test
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+      id: pnpm-install
+      with:
+        version: 7
+
+    - name: Install dependency
+      run: pnpm install
+      
+    - name: Build
+      run: pnpm run build
+      
+    - name: Test
+      run: pnpm run test
