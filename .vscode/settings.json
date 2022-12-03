@@ -10,5 +10,5 @@
         ],
         "sourceMaps": true,
     },
-    "mochaExplorer.cwd": "./test"
+    "mochaExplorer.cwd": "./packages/test"
 }

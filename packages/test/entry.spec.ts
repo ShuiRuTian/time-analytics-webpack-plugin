@@ -2,7 +2,7 @@ import { existsSync, readdirSync, statSync, readFileSync } from 'fs-extra';
 import path from 'path';
 import assert from 'assert';
 import crypto from 'crypto';
-import { TimeAnalyticsPlugin } from 'time-analytics-webpack-plugin/types';
+import { TimeAnalyticsPlugin } from 'time-analytics-webpack-plugin';
 import shelljs from 'shelljs';
 import { MONOREPO_FOLDER_PATH, PROJ_ROOT_PATH, repoInit } from './util';
 import type { Configuration, webpack } from 'webpack';
