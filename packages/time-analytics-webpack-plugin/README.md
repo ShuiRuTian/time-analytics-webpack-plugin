@@ -92,10 +92,6 @@ jest mocks "require" and not use the default `require`(maybe it use cache).
 
 However, we need to mock `require` to do some tricks to loaders.
 
-1. why monorepo?
-
-To test the source code just like the real case.
-
 1. why publish ts source file?
 
 So it would be easier to debug. It's not a big deal to download a bit more files when they will not appear in production code.

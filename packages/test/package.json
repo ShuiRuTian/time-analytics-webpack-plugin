@@ -7,7 +7,6 @@
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
     "@types/mocha": "^10.0.0",
-    "@types/node": "^16.11.56",
     "@types/shelljs": "^0.8.11",
     "fs-extra": "^10.1.0",
     "mocha": "^10.1.0",
@@ -16,7 +15,6 @@
   },
   "dependencies": {
     "@types/chai": "^4.3.4",
-    "chai": "^4.3.7",
-    "ts-node": "^10.9.1"
+    "chai": "^4.3.7"
   }
 }
