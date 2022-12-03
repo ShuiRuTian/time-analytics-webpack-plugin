@@ -1,7 +1,7 @@
 name: 'set-environment'
 description: 'Install the pacmage manager and install the dependency'
-inputs:
-outputs:
+# inputs:
+# outputs:
 runs:
   using: "composite"
   steps:
