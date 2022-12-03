@@ -86,12 +86,6 @@ We hack the `WeakMap`, when the key is `Compiler` or `Compilation`, we  will add
 `speed-measure-webpack-plugin`. An awesome plugin, which inspires this repo.
 
 ## Q&A
-1. why `mocha` rather than `jest`?
-
-jest mocks "require" and not use the default `require`(maybe it use cache).
-
-However, we need to mock `require` to do some tricks to loaders.
-
 1. why publish ts source file?
 
 So it would be easier to debug. It's not a big deal to download a bit more files when they will not appear in production code.

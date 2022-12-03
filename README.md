@@ -1,8 +1,13 @@
-The real *readme* is in 'src' folder
+# Root
+This is a monorepo
+
+## File structure
+"./packages/time-analytics-webpack-plugin": The real plugin package.
+"./packages/test": The test repos.
 
 ## Q&A
 
-1. why monorepo? Why test things are in a packge?
+1. why monorepo? Why test is in a packge?
 
 This repo is pretty easy, then why it is a monorepo?
 
