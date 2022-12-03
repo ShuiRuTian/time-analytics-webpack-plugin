@@ -107,8 +107,6 @@ export interface WebpackMetaEventInfo {
     hookType: WebpackMetaEventType,
 }
 
-export type AnalyzeEventInfo = LoaderEventInfo | PluginEventInfo;
-
 export interface OutputOption {
     /**
      * If there is a path, will output the content to the file.
@@ -259,6 +257,7 @@ function outputPluginInfos(data: PluginEventInfo[], option: OutputOption) {
     messages.push(`${nextLinePrefix}All plugins take ${prettyTime(allPluginTime, option)}`);
     return messages;
 }
+
 function outputLoaderInfos(data: LoaderEventInfo[], option: OutputOption) {
     assert(isArraySortBy(['time'], data), 'loader event info should be sorted by time.');
 

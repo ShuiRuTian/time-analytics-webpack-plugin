@@ -22,5 +22,5 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - uses: ./github/actions/set-environment
-    - uses: ./github/actions/build-and-test
+    - uses: ./.github/actions/set-environment
+    - uses: ./.github/actions/build-and-test
