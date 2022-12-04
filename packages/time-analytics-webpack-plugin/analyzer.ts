@@ -181,7 +181,7 @@ class WebpackTimeAnalyzer {
 
 const colorTime = curry((limit: number, color: Chalk, time: number) => {
     if (time >= limit) {
-        const formatedTime = color(time.toString() + 'ms');
+        const formatedTime = color(time.toFixed(4) + ' ms');
         return color(formatedTime);
     }
     return undefined;
