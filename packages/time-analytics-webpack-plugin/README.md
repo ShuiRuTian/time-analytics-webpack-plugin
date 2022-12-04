@@ -1,9 +1,10 @@
 # time-analytics-webpack-plugin
 Profiling is the base of optimise.
 
-This plugin is still in an early eage, the API is not forzen and might be changed.
+This plugin will tell the time of loaders and plugins quickly.
 
-Consider about this, maybe you want to enable type-check so that you could know the option is changed.
+> NOTE: This plugin is still in an early eage, the API is not forzen and might be changed.
+> Consider about this, maybe you want to enable type-check so that you could know the option is changed.
 
 ## How to use it
 Wrap the config, and use the wrapped config.
@@ -90,7 +91,7 @@ Seems pretty reasonable! However, webpack is using a reference equal map in `get
 
 So how to resolve it?
 
-We hack the `WeakMap`, when the key is `Compiler` or `Compilation`, we  will add a obejct and use that key object instead.
+We hack the `WeakMap`, when the key is `Compiler` or `Compilation`, we  will add an obejct and use it as key instead.
 
 ## Thanks
 `speed-measure-webpack-plugin`. An awesome plugin, which inspires this repo.
@@ -98,12 +99,12 @@ We hack the `WeakMap`, when the key is `Compiler` or `Compilation`, we  will add
 ## Q&A
 1. why publish ts source file?
 
-So it would be easier to debug. It's not a big deal to download a bit more files when they will not appear in production code.
+So it would be easier to debug. It's not a big deal to download a bit more files if they will not appear in production code.
 
 ## Questions
-1. In which condition, will `this.callback()` called? The doc says for multiple results, but it's kind of confused.
+1. In which condition, will `this.callback()` be called? The doc says for multiple results, but it's kind of confused.
 
-3. For ts
+2. For ts
 ```ts
 class A{
     static foo(){
