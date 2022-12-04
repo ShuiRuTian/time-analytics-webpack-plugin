@@ -38,6 +38,16 @@ By default, the result will be logged into console, but it's able to set the opt
 │ All loaders take 364.4643389582634ms
 ```
 
+Note that all loaders take even more time than the whole time! How could this be possible?
+
+This is due to how to calcuate the time:
+
+- For `webpack compilet time`, it means the time difference between hooks `Compiler.compile` and `Compiler.done`.
+
+- For loaders, each time some resource is executed by some loader, we record the start time and the end time. However, 
+    - loader might be async, we only record the time when the returned function of `this.async()` is called.
+    - loader might be parallel.
+
 ## What is the difference with speed-measure-webpack-plugin?
 Highlight:
 1. This plugin handles some more situations, like custom hooks, so it could measure "mini-css-extract-plugin" correctly.
