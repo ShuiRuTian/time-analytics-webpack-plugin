@@ -1,7 +1,7 @@
 {
   "name": "time-analytics-webpack-plugin",
-  "version": "0.1.16",
-  "description": "analytize the time of each part of webpack",
+  "version": "0.1.17",
+  "description": "analytize the time of loaders and plugins",
   "main": "./dist/index.js",
   "types": "./types",
   "scripts": {
@@ -13,7 +13,6 @@
     "webpack": "^5"
   },
   "devDependencies": {
-    "@tsconfig/recommended": "^1.0.1",
     "@types/node": "^16.11.56",
     "@types/tapable": "^2.2.2",
     "@types/ramda": "^0.28.20"

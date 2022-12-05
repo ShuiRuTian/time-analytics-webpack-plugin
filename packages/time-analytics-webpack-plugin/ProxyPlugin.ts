@@ -81,7 +81,6 @@ export class ProxyPlugin implements WebpackPlugin {
         return this._proxyForHooksProvider(candidate);
     }
 
-
     private _proxyForHooksProvider(
         hooksProvider: any, // @types/webpack does not export all the types. Use `any` for now.
     ) {
@@ -219,7 +218,6 @@ export class ProxyPlugin implements WebpackPlugin {
     }
 
     private knownTapMethodNames = ['tap', 'tapAsync', 'tapPromise'];
-
 
     private cachedProxyForTap = new Map();
 
@@ -362,19 +360,6 @@ function wrapTapPromiseCallback(this: ProxyPlugin, tapCallback: TapPromiseCallba
         });
         return ret;
     };
-}
-
-function getOrCreateWithContext<K, V>(
-    cache: Map<K, { value: V, context: any }>,
-    key: K, factory: (k: K) => V,
-    contextFactory: any,
-) {
-    const withContextFactory = (k: K) => ({
-        value: factory(k),
-        context: contextFactory,
-    });
-    const withContextObject = getOrCreate(cache, key, withContextFactory);
-    return withContextObject.value;
 }
 
 function getOrCreate<K, V>(cache: Map<K, V>, key: K, factory: (k: K) => V) {

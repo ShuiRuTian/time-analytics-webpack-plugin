@@ -107,8 +107,6 @@ export interface WebpackMetaEventInfo {
     hookType: WebpackMetaEventType,
 }
 
-export type AnalyzeEventInfo = LoaderEventInfo | PluginEventInfo;
-
 export interface OutputOption {
     /**
      * If there is a path, will output the content to the file.
@@ -168,7 +166,7 @@ class WebpackTimeAnalyzer {
         const messages1 = outputMetaInfo(this.metaData, option);
         const messages2 = outputPluginInfos(this.pluginData, option);
         const messages3 = outputLoaderInfos(this.loaderData, option);
-        const content = [headerText, ...messages1, ...messages2, ...messages3].join(EOL);
+        const content = ['', headerText, ...messages1, ...messages2, ...messages3, ''].join(EOL);
         if (option.filePath) {
             const outputFileAbsolutePath = resolve(option.filePath);
             console.log(`[${PACKAGE_NAME}]: try to write file to file "${outputFileAbsolutePath}"`);
@@ -183,7 +181,7 @@ class WebpackTimeAnalyzer {
 
 const colorTime = curry((limit: number, color: Chalk, time: number) => {
     if (time >= limit) {
-        const formatedTime = color(time.toString() + 'ms');
+        const formatedTime = color(time.toFixed(4) + ' ms');
         return color(formatedTime);
     }
     return undefined;
@@ -259,6 +257,7 @@ function outputPluginInfos(data: PluginEventInfo[], option: OutputOption) {
     messages.push(`${nextLinePrefix}All plugins take ${prettyTime(allPluginTime, option)}`);
     return messages;
 }
+
 function outputLoaderInfos(data: LoaderEventInfo[], option: OutputOption) {
     assert(isArraySortBy(['time'], data), 'loader event info should be sorted by time.');
 

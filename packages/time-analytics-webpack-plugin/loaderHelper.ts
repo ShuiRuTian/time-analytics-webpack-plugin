@@ -1,8 +1,14 @@
 import type { RuleSetRule } from 'webpack';
 import { PACKAGE_NAME } from './const';
 import { fail } from './utils';
+
+const atStartLoaderPackageName = /(@.*?\/.*?)\//;
+
 /**
  * get the folder name after the last "node_moduels"
+ * 
+ * If the folder name is starts with '@', then try to combine next path as the whole name
+ * 
  * otherwise, the whole path
  */
 export function getLoaderName(path: string) {
@@ -11,8 +17,11 @@ export function getLoaderName(path: string) {
     const index = canonicalPath.lastIndexOf(targetString);
     if (index === -1) return canonicalPath;
     const sub = canonicalPath.substring(index + targetString.length);
-    const loaderName = sub.substring(0, sub.indexOf('/'));
-    return loaderName;
+    if (sub.startsWith('@')) {
+        return atStartLoaderPackageName.exec(sub)?.[1] ?? path;
+    } else {
+        return sub.substring(0, sub.indexOf('/'));
+    }
 }
 
 function normalizeRuleCore(rule: RuleSetRule) {

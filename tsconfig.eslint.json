@@ -1,8 +1,7 @@
 {
     "extends": "./tsconfig.base.json",
     "include": [
-        "index.ts",
-        "src/**/*.ts",
-        "test/**/*.ts"
+        "./packages/time-analytics-webpack-plugin/**/*.ts",
+        "./packages/test/**/*.ts",
     ]
 }

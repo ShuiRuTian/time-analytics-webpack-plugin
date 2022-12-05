@@ -1,9 +1,11 @@
 # time-analytics-webpack-plugin
 Profiling is the base of optimise.
 
-This plugin is still in an early eage, the API is not forzen and might be changed.
+This plugin will tell the time of loaders and plugins quickly.
 
-Consider about this, maybe you want to enable type-check so that you could know the option is changed.
+> NOTE: This plugin is still in an early eage, the API is not forzen and might be changed.
+> Consider about this, maybe you want to enable type-check so that you could know the option is changed.
+
 ## How to use it
 Wrap the config, and use the wrapped config.
 
@@ -18,6 +20,34 @@ Or wrap a function that will return a configuration
 ```ts
 const wrappedWebpackConfigFactory = TimeAnalyticsPlugin.wrap(webpackConfigFactory);
 ```
+
+## Output
+By default, the result will be logged into console, but it's able to set the options to make it write to some file.
+
+```
+┌── time-analytics-webpack-plugin
+│ Webpack compile takes 212.00251600146294ms
+├── Plugins
+│ Plugin TerserPlugin takes 257.66442596912384ms
+│ Plugin MiniCssExtractPlugin takes 1.021947979927063ms
+│ Plugin DefinePlugin takes 0.03626999258995056ms
+│ All plugins take 258.72264394164085ms
+├── Loaders
+│ Loader babel-loader takes 161.88674998283386ms
+│ Loader mini-css-extract-plugin takes 190.57009398937225ms
+│ Loader css-loader takes 12.007494986057281ms
+│ All loaders take 364.4643389582634ms
+```
+
+Note that all loaders take even more time than the whole time! How could this be possible?
+
+This is due to how to calcuate the time:
+
+- For `webpack compilet time`, it means the time difference between hooks `Compiler.compile` and `Compiler.done`.
+
+- For loaders, each time some resource is executed by some loader, we record the start time and the end time. However, 
+    - loader might be async, we only record the time when the returned function of `this.async()` is called.
+    - loader might be parallel.
 
 ## What is the difference with speed-measure-webpack-plugin?
 Highlight:
@@ -61,30 +91,20 @@ Seems pretty reasonable! However, webpack is using a reference equal map in `get
 
 So how to resolve it?
 
-We hack the `WeakMap`, when the key is `Compiler` or `Compilation`, we  will add a obejct and use that key object instead.
+We hack the `WeakMap`, when the key is `Compiler` or `Compilation`, we  will add an obejct and use it as key instead.
 
 ## Thanks
 `speed-measure-webpack-plugin`. An awesome plugin, which inspires this repo.
 
 ## Q&A
-1. why `mocha` rather than `jest`?
-
-jest mocks "require" and not use the default `require`(maybe it use cache).
-
-However, we need to mock `require` to do some tricks to loaders.
-
-1. why monorepo?
-
-To test the source code just like the real case.
-
 1. why publish ts source file?
 
-So it would be easier to debug. It's not a big deal to download a bit more files when they will not appear in production code.
+So it would be easier to debug. It's not a big deal to download a bit more files if they will not appear in production code.
 
 ## Questions
-1. In which condition, will `this.callback()` called? The doc says for multiple results, but it's kind of confused.
+1. In which condition, will `this.callback()` be called? The doc says for multiple results, but it's kind of confused.
 
-3. For ts
+2. For ts
 ```ts
 class A{
     static foo(){
