@@ -1,5 +1,6 @@
 import { PACKAGE_NAME } from './const';
 import { performance } from 'perf_hooks';
+import chalk from 'chalk';
 
 /**
  * Add prefix "[time-analytics-webpack-plugin]: " prefix to all meesages
@@ -10,7 +11,7 @@ export class ConsoleHelper {
     }
 
     static warn(message: string) {
-        console.warn(ConsoleHelper.getMessage(message));
+        console.log(chalk.yellow(ConsoleHelper.getMessage(message)));
     }
 
     private static getMessage(message: string) {
