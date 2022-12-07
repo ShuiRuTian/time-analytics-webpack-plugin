@@ -89,7 +89,7 @@ export abstract class Writer {
         // #region meta
         if (option.filePath) {
             const outputFileAbsolutePath = path.resolve(option.filePath);
-            ConsoleHelper.log(`[${PACKAGE_NAME}]: try to write file to file "${outputFileAbsolutePath}"`);
+            ConsoleHelper.log(`try to write file to file "${outputFileAbsolutePath}"`);
             writeFileSync(option.filePath, content);
         } else {
             console.log(content);
