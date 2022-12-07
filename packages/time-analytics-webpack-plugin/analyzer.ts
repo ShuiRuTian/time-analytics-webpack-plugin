@@ -1,11 +1,6 @@
-import chalk, { Chalk } from 'chalk';
-import { writeFileSync } from 'fs';
-import { EOL } from 'os';
-import { resolve } from 'path';
-import { curry, groupBy, path, prop } from 'ramda';
-import { PACKAGE_NAME } from './const';
-import { getLoaderName } from './loaderHelper';
-import { assert, fail } from './utils';
+import { groupBy, path, prop } from 'ramda';
+import { assert } from './utils';
+import { Writer } from './writer';
 
 export enum AnalyzeInfoKind {
     loader,
@@ -161,43 +156,14 @@ class WebpackTimeAnalyzer {
 
     output(option: OutputOption): void {
         assert(this._isInitilized === true, 'Time Analyzer must be initialized when outputing.');
+        const tmp1 = analyticsOutputMetaInfo(this.metaData);
+        const tmp2 = analyticsPluginInfos(this.pluginData);
+        const tmp3 = analyticsOutputLoaderInfos(this.loaderData);
 
-        // TODO: split analyze and output
-        const messages1 = outputMetaInfo(this.metaData, option);
-        const messages2 = outputPluginInfos(this.pluginData, option);
-        const messages3 = outputLoaderInfos(this.loaderData, option);
-        const content = ['', headerText, ...messages1, ...messages2, ...messages3, ''].join(EOL);
-        if (option.filePath) {
-            const outputFileAbsolutePath = resolve(option.filePath);
-            console.log(`[${PACKAGE_NAME}]: try to write file to file "${outputFileAbsolutePath}"`);
-            writeFileSync(option.filePath, content);
-        } else {
-            console.log(content);
-        }
+        Writer.foo(tmp1, tmp2, tmp3, option);
 
         this.clear();
     }
-}
-
-const colorTime = curry((limit: number, color: Chalk, time: number) => {
-    if (time >= limit) {
-        const formatedTime = color(time.toFixed(4) + ' ms');
-        return color(formatedTime);
-    }
-    return undefined;
-});
-
-function prettyTime(ms: number, option: OutputOption) {
-    const dangerTime = colorTime(option.dangerTimeLimit, chalk.red);
-    const warnTime = colorTime(option.warnTimeLimit, chalk.yellow);
-    const safeTime = colorTime(0, chalk.green);
-    for (const func of [dangerTime, warnTime, safeTime]) {
-        const res = func(ms);
-        if (res)
-            return res;
-    }
-
-    fail('We did not give a pretty message about time, why?');
 }
 
 function isArraySortBy<T>(paths: string[], arr: T[]) {
@@ -214,11 +180,11 @@ function isArraySortBy<T>(paths: string[], arr: T[]) {
     return true;
 }
 
-const headerText = '┌── time-analytics-webpack-plugin';
-const sectionStartPrefix = '├── ';
-const nextLinePrefix = '│ ';
+export interface MetaAnalyticsResult {
+    totalTime: number;
+}
 
-function outputMetaInfo(data: WebpackMetaEventInfo[], option: OutputOption) {
+function analyticsOutputMetaInfo(data: WebpackMetaEventInfo[]): MetaAnalyticsResult {
     // validate
     assert(isArraySortBy(['time'], data), 'webpack meta event info should be sorted by time.');
     const compilerCompileEvents = data.filter(info => info.hookType === WebpackMetaEventType.Compiler_compile);
@@ -226,19 +192,25 @@ function outputMetaInfo(data: WebpackMetaEventInfo[], option: OutputOption) {
     const compilerDoneEvents = data.filter(info => info.hookType === WebpackMetaEventType.Compiler_done);
     assert(compilerDoneEvents.length === 1, 'webpack must done only once');
 
-    const messages: string[] = [];
     const compileTotalTime = compilerDoneEvents[0].time - compilerCompileEvents[0].time;
-    messages.push(`${nextLinePrefix}Webpack compile takes ${prettyTime(compileTotalTime, option)}`);
-    return messages;
+
+    return {
+        totalTime: compileTotalTime,
+    };
 }
 
-function outputPluginInfos(data: PluginEventInfo[], option: OutputOption) {
+export interface PluginAnalyticsResult {
+    pluginsInfo: {
+        name: string;
+        time: number;
+    }[];
+}
+
+function analyticsPluginInfos(data: PluginEventInfo[]): PluginAnalyticsResult {
     assert(isArraySortBy(['time'], data), 'plugin event info should be sorted by time.');
 
-    const messages: string[] = [];
+    const res: PluginAnalyticsResult = { pluginsInfo: [] };
 
-    messages.push(`${sectionStartPrefix}${chalk.blue(chalk.bold('Plugins'))}`);
-    let allPluginTime = 0;
     const nameGrouppedPlugin = groupBy(prop('pluginName'), data);
     Object.entries(nameGrouppedPlugin).forEach(([pluginName, dataA]) => {
         let currentPluginTotalTime = 0;
@@ -251,30 +223,25 @@ function outputPluginInfos(data: PluginEventInfo[], option: OutputOption) {
             const tapTime = dataB[1].time - dataB[0].time;
             currentPluginTotalTime += tapTime;
         });
-        allPluginTime += currentPluginTotalTime;
-        messages.push(`${nextLinePrefix}Plugin ${chalk.bold(pluginName)} takes ${prettyTime(currentPluginTotalTime, option)}`);
+        res.pluginsInfo.push({ name: pluginName, time: currentPluginTotalTime });
     });
-    messages.push(`${nextLinePrefix}All plugins take ${prettyTime(allPluginTime, option)}`);
-    return messages;
+    return res;
 }
 
-function outputLoaderInfos(data: LoaderEventInfo[], option: OutputOption) {
+export interface LoaderAnalyticsResult {
+    loadersInfo: {
+        path: string;
+        time: number;
+    }[];
+}
+
+function analyticsOutputLoaderInfos(data: LoaderEventInfo[]): LoaderAnalyticsResult {
     assert(isArraySortBy(['time'], data), 'loader event info should be sorted by time.');
 
-    const messages: string[] = [];
+    const res: LoaderAnalyticsResult = { loadersInfo: [] };
 
-    const loaderIdSet = new Set<string>();
-    let isDuplicatedLodaerIdOutputed = false;
-
-    messages.push(`${sectionStartPrefix}${chalk.blue(chalk.bold('Loaders'))}`);
-    let allLoaderTime = 0;
     const nameGrouppedLoader = groupBy(prop('loaderPath'), data);
     Object.entries(nameGrouppedLoader).forEach(([loaderPath, dataA]) => {
-        const loaderName = getLoaderName(loaderPath);
-        if (option.ignoredLoaders.includes(loaderPath)) {
-            messages.push(`${nextLinePrefix}Loader ${chalk.bold(loaderPath)} is ignored.`);
-            return;
-        }
         let currentLoaderTotalTime = 0;
         const idGroupedPlugin = groupBy(prop('callId'), dataA);
         Object.entries(idGroupedPlugin).forEach(([callId, dataB]) => {
@@ -285,19 +252,10 @@ function outputLoaderInfos(data: LoaderEventInfo[], option: OutputOption) {
             const tapTime = dataB[1].time - dataB[0].time;
             currentLoaderTotalTime += tapTime;
         });
-        allLoaderTime += currentLoaderTotalTime;
-        const loaderId = option.groupLoaderByPath ? loaderPath : loaderName;
-        if (loaderIdSet.has(loaderId)) {
-            isDuplicatedLodaerIdOutputed = true;
-        }
-        loaderIdSet.add(loaderId);
-        messages.push(`${nextLinePrefix}Loader ${chalk.bold(loaderId)} takes ${prettyTime(currentLoaderTotalTime, option)}`);
+
+        res.loadersInfo.push({ path: loaderPath, time: currentLoaderTotalTime });
     });
-    if (isDuplicatedLodaerIdOutputed) {
-        messages.push(`${nextLinePrefix}There are many differnt loaders that have same assumed name. Consider use "loader.groupedByAbsolutePath" option to show the full path of loaders.`);
-    }
-    messages.push(`${nextLinePrefix}All loaders take ${prettyTime(allLoaderTime, option)}`);
-    return messages;
+    return res;
 }
 
 export const analyzer = new WebpackTimeAnalyzer();
