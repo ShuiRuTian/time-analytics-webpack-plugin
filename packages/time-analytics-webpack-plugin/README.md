@@ -31,7 +31,9 @@ This is due to how to calcuate the time:
 - For `webpack compilet time`, it means the time difference between hooks `Compiler.compile` and `Compiler.done`.
 
 - For loaders, each time some resource is executed by some loader, we record the start time and the end time. However, 
-    - loader might be async, we only record the time when the returned function of `this.async()` is called.
+    - loader might be async, we only record the time when the returned function of `this.async()` is called. -
+      - If there is any OS call(like read/write file), we have to include that time.
+      - Event loop might make it not accurate, because a callback will not be called immediately when it's ready(only if execution stack is empty and all ready tasks before this task in task queue is executed).
     - loader might be parallel.
 
 ## How to use it

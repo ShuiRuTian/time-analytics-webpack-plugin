@@ -43,7 +43,7 @@ export interface LoaderEventInfo {
     /**
      * Whether this loader is async loader or sync loader.
      * 
-     * async loader means this loader calls `this.async()`
+     * async loader means this loader calls `this.async()`, only `end` event is accurate, `start` event will always set this to `false`.
      */
     isAsync: boolean;
 }
