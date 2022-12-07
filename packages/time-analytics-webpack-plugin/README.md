@@ -6,21 +6,6 @@ This plugin will tell the time of loaders and plugins quickly.
 > NOTE: This plugin is still in an early eage, the API is not forzen and might be changed.
 > Consider about this, maybe you want to enable type-check so that you could know the option is changed.
 
-## How to use it
-Wrap the config, and use the wrapped config.
-
-``` ts
-const wrappedWebpackConfig = TimeAnalyticsPlugin.wrap(webpackConfig);
-
-// Or use options to control behaviors
-const wrappedWebpackConfig = TimeAnalyticsPlugin.wrap(webpackConfig,{ /* options */});
-```
-
-Or wrap a function that will return a configuration
-```ts
-const wrappedWebpackConfigFactory = TimeAnalyticsPlugin.wrap(webpackConfigFactory);
-```
-
 ## Output
 By default, the result will be logged into console, but it's able to set the options to make it write to some file.
 
@@ -48,6 +33,112 @@ This is due to how to calcuate the time:
 - For loaders, each time some resource is executed by some loader, we record the start time and the end time. However, 
     - loader might be async, we only record the time when the returned function of `this.async()` is called.
     - loader might be parallel.
+
+## How to use it
+Wrap the config, and use the wrapped config.
+
+``` ts
+const wrappedWebpackConfig = TimeAnalyticsPlugin.wrap(webpackConfig);
+
+// Or use options to control behaviors
+const wrappedWebpackConfig = TimeAnalyticsPlugin.wrap(webpackConfig,{ /* options */});
+```
+
+Or wrap a function that will return a configuration
+```ts
+const wrappedWebpackConfigFactory = TimeAnalyticsPlugin.wrap(webpackConfigFactory);
+```
+
+## Options 
+
+Type should be the document. Please provide any feedback if you think it's not enough.
+
+``` ts
+
+interface TimeAnalyticsPluginOptions {
+    /**
+     * If fase, do nothing
+     * 
+     * If true, output all loader and plugin infos.
+     * 
+     * If object, loader and plugin could be turn off.
+     * 
+     * Control loader and plugin with fine grained in `loader` and `plugin` options (not this option)
+     * 
+     * @default true
+     */
+    enable?: boolean | {
+        /**
+         * @default true
+         */
+        loader: boolean,
+        /**
+         * @default true
+         */
+        plugin: boolean,
+    };
+
+    /**
+     * If provided, write the result to a file.
+     * 
+     * Otherwise the stdout stream.
+     */
+    outputFile?: string;
+    /**
+     * Display the time as warning color if time is more than this limit.
+     * 
+     * The unit is ms.
+     * 
+     * @default 3000
+     */
+    warnTimeLimit?: number;
+    /**
+     * Display the time as danger color if time is more than this limit.
+     * 
+     * The unit is ms.
+     * 
+     * @default 8000
+     */
+    dangerTimeLimit?: number;
+    loader?: {
+        /**
+         * If true, output the absolute path of the loader.
+         * 
+         * By default, the plugin displays loader time by a assumed loader name
+         * 
+         * Like `babel-loader takes xxx ms.`
+         * 
+         * The assumption is the loader's name is the first name after the last `node_modules` in the path. 
+         * 
+         * However, sometimes, it's not correct, like the loader's package is `@foo/loader1` then the assumed name is "@foo", 
+         * or some framework like `next` will move the loader to some strange place.
+         * 
+         * @default false
+         */
+        groupedByAbsolutePath?: boolean;
+        /**
+         * If true, display the most time consumed resource's info
+         * 
+         * @default 0
+         * @NotImplementYet
+         */
+        topResources?: number;
+        /**
+         * The loaders that should not be analytized.
+         * 
+         * Use the node package's name.
+         */
+        exclude?: string[];
+    };
+    plugin?: {
+        /**
+         * The plugins that should not be analytized.
+         * 
+         * The name is the plugin class itself, not the package's name.
+         */
+        exclude?: string[];
+    }
+```
 
 ## What is the difference with speed-measure-webpack-plugin?
 Highlight:
