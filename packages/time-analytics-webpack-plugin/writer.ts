@@ -2,10 +2,9 @@ import { writeFileSync } from 'fs';
 import { EOL } from 'os';
 import { curry, descend, prop, sort } from 'ramda';
 import chalk, { Chalk } from 'chalk';
-import { LoaderAnalyticsResult, MetaAnalyticsResult, OutputOption, PluginAnalyticsResult } from './analyzer';
-import { PACKAGE_NAME } from './const';
-import { ConsoleHelper, fail } from './utils';
 import path from 'path';
+import { LoaderAnalyticsResult, MetaAnalyticsResult, OutputOption, PluginAnalyticsResult } from './analyzer';
+import { ConsoleHelper, fail } from './utils';
 import { getLoaderName } from './loaderHelper';
 
 const colorTime = curry((limit: number, color: Chalk, time: number) => {
