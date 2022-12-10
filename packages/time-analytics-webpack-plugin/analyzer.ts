@@ -114,9 +114,6 @@ export interface OutputOption {
     warnTimeLimit: number;
     dangerTimeLimit: number;
     groupLoaderByPath: boolean;
-    /**
-     * TODO: should we remove this option? Feels like we should not collect the info at all. Do this by give loader options.
-     */
     ignoredLoaders: string[];
 }
 
@@ -158,7 +155,7 @@ class WebpackTimeAnalyzer {
         assert(this._isInitilized === true, 'Time Analyzer must be initialized when outputing.');
         const tmp1 = analyticsOutputMetaInfo(this.metaData);
         const tmp2 = analyticsPluginInfos(this.pluginData);
-        const tmp3 = analyticsOutputLoaderInfos(this.loaderData);
+        const tmp3 = analyticsOutputLoaderInfos(this.loaderData, { ignoredLoaders: option.ignoredLoaders });
 
         Writer.foo(tmp1, tmp2, tmp3, option);
 
@@ -231,27 +228,36 @@ function analyticsPluginInfos(data: PluginEventInfo[]): PluginAnalyticsResult {
 export interface LoaderAnalyticsResult {
     loadersInfo: {
         path: string;
+        /**
+         * `0` means the loader is ignored. @see {@link AnalyticsLoaderOptions.ignoredLoaders}
+         */
         time: number;
     }[];
 }
 
-function analyticsOutputLoaderInfos(data: LoaderEventInfo[]): LoaderAnalyticsResult {
+interface AnalyticsLoaderOptions {
+    ignoredLoaders: string[];
+}
+
+function analyticsOutputLoaderInfos(data: LoaderEventInfo[], options: AnalyticsLoaderOptions): LoaderAnalyticsResult {
     assert(isArraySortBy(['time'], data), 'loader event info should be sorted by time.');
 
     const res: LoaderAnalyticsResult = { loadersInfo: [] };
-
     const nameGrouppedLoader = groupBy(prop('loaderPath'), data);
     Object.entries(nameGrouppedLoader).forEach(([loaderPath, dataA]) => {
         let currentLoaderTotalTime = 0;
-        const idGroupedPlugin = groupBy(prop('callId'), dataA);
-        Object.entries(idGroupedPlugin).forEach(([callId, dataB]) => {
-            assert(dataB.length === 2
-                && dataB[0].eventType === LoaderEventType.start
-                && dataB[1].eventType === LoaderEventType.end
-                , `each laoder execution should be collected info for start and end, once and only once. But for ${loaderPath}, there is an error, why?`);
-            const tapTime = dataB[1].time - dataB[0].time;
-            currentLoaderTotalTime += tapTime;
-        });
+
+        if (!options.ignoredLoaders.includes(loaderPath)) {
+            const idGroupedPlugin = groupBy(prop('callId'), dataA);
+            Object.entries(idGroupedPlugin).forEach(([callId, dataB]) => {
+                assert(dataB.length === 2
+                    && dataB[0].eventType === LoaderEventType.start
+                    && dataB[1].eventType === LoaderEventType.end
+                    , `each laoder execution should be collected info for start and end, once and only once. But for ${loaderPath}, there is an error, why?`);
+                const tapTime = dataB[1].time - dataB[0].time;
+                currentLoaderTotalTime += tapTime;
+            });
+        }
 
         res.loadersInfo.push({ path: loaderPath, time: currentLoaderTotalTime });
     });

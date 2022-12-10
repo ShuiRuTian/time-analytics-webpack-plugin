@@ -60,7 +60,7 @@ export abstract class Writer {
         let isDuplicatedLodaerIdOutputed = false;
         const loaderIdSet = new Set<string>();
         sort(byTime, c.loadersInfo).forEach(({ path: loaderPath, time }) => {
-            if (option.ignoredLoaders.includes(loaderPath)) {
+            if (time === 0) {
                 messages.push(`${nextLinePrefix}Loader ${chalk.bold(loaderPath)} is ignored.`);
                 return;
             }
