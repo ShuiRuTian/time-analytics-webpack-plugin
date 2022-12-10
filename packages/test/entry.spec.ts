@@ -71,6 +71,7 @@ describe('Time Analyze Plugin', () => {
         outputFile: logFilePath,
         loader: {
           groupedByAbsolutePath: true,
+          exclude:['css-loader'],
         },
       });
 

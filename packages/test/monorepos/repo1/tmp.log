@@ -1,0 +1,13 @@
+
+┌── time-analytics-webpack-plugin
+│ Webpack compile takes 163.5588 ms
+├── Plugins
+│ Plugin TerserPlugin takes 204.8714 ms
+│ Plugin MiniCssExtractPlugin takes 0.7325 ms
+│ Plugin DefinePlugin takes 0.0432 ms
+│ All plugins take 205.6471 ms
+├── Loaders
+│ Loader /home/megrez/Desktop/Code/Node/webpack-analyze-plugin/packages/test/monorepos/node_modules/.pnpm/mini-css-extract-plugin@2.7.0/node_modules/mini-css-extract-plugin/dist/loader.js takes 162.2352 ms
+│ Loader /home/megrez/Desktop/Code/Node/webpack-analyze-plugin/packages/test/monorepos/node_modules/.pnpm/babel-loader@8.3.0_@babel+core@7.20.2/node_modules/babel-loader/lib/index.js takes 138.3067 ms
+│ Loader /home/megrez/Desktop/Code/Node/webpack-analyze-plugin/packages/test/monorepos/node_modules/.pnpm/css-loader@5.2.7/node_modules/css-loader/dist/cjs.js takes 9.9462 ms
+│ All loaders take 310.4882 ms
