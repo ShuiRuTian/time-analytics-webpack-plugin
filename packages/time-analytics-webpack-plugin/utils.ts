@@ -66,12 +66,12 @@ export function now() {
  */
 // webpack does not export tapable, so there is no way to know whether a class is hook or not easily.
 export function isConstructorNameInPrototypeChain(name: string, obj: any) {
-    let curPropto = obj;
-    while (curPropto) {
-        if (curPropto.constructor.name === name) {
+    let curProto = obj;
+    while (curProto) {
+        if (curProto.constructor.name === name) {
             return true;
         }
-        curPropto = Reflect.getPrototypeOf(curPropto);
+        curProto = Reflect.getPrototypeOf(curProto);
     }
     return false;
 }
