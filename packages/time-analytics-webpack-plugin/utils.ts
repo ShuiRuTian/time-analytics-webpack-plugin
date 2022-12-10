@@ -2,6 +2,8 @@ import { PACKAGE_NAME } from './const';
 import { performance } from 'perf_hooks';
 import chalk from 'chalk';
 
+const MESSAGE_PREFIX = `[${PACKAGE_NAME}]: `;
+
 /**
  * Add prefix "[time-analytics-webpack-plugin]: " prefix to all meesages
  */
@@ -15,7 +17,7 @@ export class ConsoleHelper {
     }
 
     private static getMessage(message: string) {
-        return `[${PACKAGE_NAME}]: ${message}`;
+        return `${MESSAGE_PREFIX}${message}`;
     }
 }
 
@@ -35,7 +37,8 @@ export function failInDebug(message?: string): never {
 
 export function assert(expression: unknown, message?: string, verboseDebugInfo?: string | (() => string)): asserts expression {
     if (!expression) {
-        message = message ? `False expression: ${message} ` : 'False expression.';
+        const messagePostfix = message ? `with message "${message}"` : '';
+        message = `${MESSAGE_PREFIX}assert failed${messagePostfix}`;
         if (verboseDebugInfo) {
             message += '\r\nVerbose Debug Information: ' + (typeof verboseDebugInfo === 'string' ? verboseDebugInfo : verboseDebugInfo());
         }
