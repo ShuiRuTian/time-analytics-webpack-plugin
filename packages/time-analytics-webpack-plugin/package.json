@@ -4,10 +4,23 @@
   "description": "analytize the time of loaders and plugins",
   "main": "./dist/index.js",
   "types": "./types",
+  "keywords": [
+    "webpack",
+    "profiling",
+    "time",
+    "speed"
+  ],
   "scripts": {
     "build": "tsc -p ./tsconfig.json"
   },
-  "author": "Song Gao",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ShuiRuTian/time-analytics-webpack-plugin.git"
+  },
+  "author": {
+    "name": "Song Gao",
+    "email": "158983297@qq.com"
+  },
   "license": "BSD",
   "peerDependencies": {
     "webpack": "^5"
