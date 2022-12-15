@@ -61,7 +61,7 @@ export abstract class Writer {
         const loaderIdSet = new Set<string>();
         sort(byTime, c.loadersInfo).forEach(({ path: loaderPath, time }) => {
             if (time === 0) {
-                messages.push(`${nextLinePrefix}Loader ${chalk.bold(loaderPath)} is ignored.`);
+                messages.push(`${nextLinePrefix}Loader ${chalk.bold(loaderPath)} is ignored by "loader.exclude" option`);
                 return;
             }
             allLoaderTime += time;

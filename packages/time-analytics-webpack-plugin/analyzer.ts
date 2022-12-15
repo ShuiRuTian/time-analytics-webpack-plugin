@@ -247,7 +247,7 @@ function analyticsOutputLoaderInfos(data: LoaderEventInfo[], options: AnalyticsL
     Object.entries(nameGrouppedLoader).forEach(([loaderPath, dataA]) => {
         let currentLoaderTotalTime = 0;
 
-        if (!options.ignoredLoaders.includes(loaderPath)) {
+        if (!options.ignoredLoaders.some(ignoredLoader => loaderPath.includes(ignoredLoader))) {
             const idGroupedPlugin = groupBy(prop('callId'), dataA);
             Object.entries(idGroupedPlugin).forEach(([callId, dataB]) => {
                 assert(dataB.length === 2

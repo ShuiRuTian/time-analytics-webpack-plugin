@@ -42,7 +42,6 @@ export class ProxyPlugin implements WebpackPlugin {
         }
     }
 
-
     constructor(proxiedPlugin: WebpackPlugin | WebpackPluginLikeFunction) {
         this.validatePluginIsUsedOnce(proxiedPlugin);
         this._proxiedPlugin = proxiedPlugin;
