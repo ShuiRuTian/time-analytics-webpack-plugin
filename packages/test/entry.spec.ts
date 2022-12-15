@@ -67,11 +67,13 @@ describe('Time Analyze Plugin', () => {
 
       const logFilePath = path.join(repoPath, './tmp.log');
 
+      const ignoredLoaderName = 'css-loader';
+
       const wrappedWebpackConfig = TimeAnalyticsPlugin.wrap(webpackConfig, {
         outputFile: logFilePath,
         loader: {
           groupedByAbsolutePath: true,
-          exclude:['css-loader'],
+          exclude: [ignoredLoaderName],
         },
       });
 
@@ -84,8 +86,17 @@ describe('Time Analyze Plugin', () => {
       });
 
       it('should have a log file if set "outputFile" option', async () => {
+        // await executeWebpack(webpackFunc, wrappedWebpackConfig);
         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         expect(existsSync(logFilePath)).to.be.true;
+      });
+
+      it('should ignore the loader time if set "loader.exclude" option', async () => {
+        // await executeWebpack(webpackFunc, wrappedWebpackConfig);
+        const content = readFileSync(logFilePath, 'utf-8')
+          .split(/\r?\n/);
+        const matcher = new RegExp(`Loader .*?${ignoredLoaderName}.*? is ignored by "loader.exclude" option`);
+        content.some(line => line.match(matcher));
       });
     });
   });
