@@ -121,7 +121,7 @@ class WebpackTimeAnalyzer {
     private _isInitilized = false;
 
     initilize() {
-        assert(this._isInitilized === false, '${PACKAGE_NAME} is initialized twice, why do you do this? Please submit an issue.');
+        assert(this._isInitilized === false, '${PACKAGE_NAME} is initialized twice. This should be a bug if it is not intentional. Please submit an issue.');
         this._isInitilized = true;
     }
 
@@ -157,7 +157,7 @@ class WebpackTimeAnalyzer {
         const tmp2 = analyticsPluginInfos(this.pluginData);
         const tmp3 = analyticsOutputLoaderInfos(this.loaderData, { ignoredLoaders: option.ignoredLoaders });
 
-        Writer.foo(tmp1, tmp2, tmp3, option);
+        Writer.writeResult(tmp1, tmp2, tmp3, option);
 
         this.clear();
     }

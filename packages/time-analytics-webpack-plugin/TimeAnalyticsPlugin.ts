@@ -4,6 +4,7 @@ import { ProxyPlugin } from './ProxyPlugin';
 import { normalizeRules } from './loaderHelper';
 import { ConsoleHelper, fail, now } from './utils';
 import './sideEffects/hackWeakMap';
+import { PACKAGE_NAME } from './const';
 
 export declare class WebpackPlugin {
     /**
@@ -231,10 +232,10 @@ function wrapConfigurationCore(this: TimeAnalyticsPlugin, config: Configuration)
 }
 
 /**
- * Not accurate
+ * Fancy hack to judge whether an object is a Webpack plugin.
  */
-export function isWebpackPlugin(a: any): a is WebpackPlugin {
-    return typeof a.apply === 'function' && a.apply !== Object.apply;
+export function isWebpackPlugin(p: any): p is WebpackPlugin {
+    return typeof p.apply === 'function' && p.apply !== Object.apply;
 }
 
 type ArrayElement<ArrayType extends readonly unknown[]> =
@@ -244,7 +245,7 @@ function wrapMinimizer(minimizer: ArrayElement<NonNullable<NonNullable<Configura
     if (isWebpackPlugin(minimizer)) {
         return wrapPluginCore(minimizer);
     }
-    ConsoleHelper.warn('meet one minimizer which is a function, Time Analytics plugin could not analyze such situration.');
+    ConsoleHelper.warn(`meet one minimizer which is a function, ${PACKAGE_NAME} can not analyze it now.`);
     return minimizer;
 }
 
@@ -256,7 +257,7 @@ function injectModule(moduleOptions: ModuleOptions) {
     const newModuleOptions = { ...moduleOptions };
     if (newModuleOptions.rules) {
         if (!isRuleObjectArray(newModuleOptions.rules)) {
-            fail('There are plain string "..." in "module.rules", why do you need this? Please submit an issue.');
+            fail('There is plain string "..." in "module.rules", why do you need this? Please submit an issue.');
         }
 
         newModuleOptions.rules = normalizeRules(newModuleOptions.rules);

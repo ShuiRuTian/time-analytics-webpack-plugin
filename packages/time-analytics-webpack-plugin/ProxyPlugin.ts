@@ -335,7 +335,7 @@ function wrapTapAsyncCallback(this: ProxyPlugin, tapCallback: TapAsyncCallback):
 function wrapTapPromiseCallback(this: ProxyPlugin, tapCallback: TapPromiseCallback): TapPromiseCallback {
     const pluginName = this.proxiedPluginName;
     const proxyForHookProviderCandidates = this._proxyForHookProviderCandidates.bind(this);
-    return function (...args: any[]) {
+    return async function (...args: any[]) {
         const wrapedArgs = args.map(proxyForHookProviderCandidates);
         const uuid = randomUUID();
         analyzer.collectPluginInfo({
@@ -346,18 +346,16 @@ function wrapTapPromiseCallback(this: ProxyPlugin, tapCallback: TapPromiseCallba
             tapCallId: uuid,
             tapType: TapType.promise,
         });
-        const originPromise = tapCallback(...wrapedArgs);
-        const ret = originPromise.then(() => {
-            analyzer.collectPluginInfo({
-                eventType: PluginEventType.end,
-                kind: AnalyzeInfoKind.plugin,
-                pluginName,
-                time: now(),
-                tapCallId: uuid,
-                tapType: TapType.promise,
-            });
+        await tapCallback(...wrapedArgs);
+        analyzer.collectPluginInfo({
+            eventType: PluginEventType.end,
+            kind: AnalyzeInfoKind.plugin,
+            pluginName,
+            time: now(),
+            tapCallId: uuid,
+            tapType: TapType.promise,
         });
-        return ret;
+        return;
     };
 }
 

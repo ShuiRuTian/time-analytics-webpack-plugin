@@ -24,7 +24,7 @@ export function getLoaderName(path: string) {
     }
 }
 
-function normalizeRuleCore(rule: RuleSetRule) {
+function normalizeRule(rule: RuleSetRule) {
     if (rule.loader) {
         rule.use = [rule.loader];
         if (rule.options) {
@@ -55,19 +55,12 @@ function normalizeRuleCore(rule: RuleSetRule) {
     return rule;
 }
 
-function normalizeRule(rule: RuleSetRule | undefined) {
-    if (!rule) {
-        return rule;
-    }
-    return normalizeRuleCore(rule);
-}
-
 export function normalizeRules(rules: RuleSetRule[] | undefined): RuleSetRule[] | undefined {
     if (!rules) {
         return rules;
     }
 
-    if (Array.isArray(rules)) return rules.map(normalizeRuleCore);
+    if (Array.isArray(rules)) return rules.map(normalizeRule);
 
     return rules;
 }

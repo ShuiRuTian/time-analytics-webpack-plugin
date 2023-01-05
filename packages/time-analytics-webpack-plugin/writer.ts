@@ -37,7 +37,7 @@ interface TimeObject { time: number }
 const byTime = descend<TimeObject>(prop('time'));
 
 export abstract class Writer {
-    static foo(a: MetaAnalyticsResult, b: PluginAnalyticsResult, c: LoaderAnalyticsResult, option: OutputOption) {
+    static writeResult(a: MetaAnalyticsResult, b: PluginAnalyticsResult, c: LoaderAnalyticsResult, option: OutputOption) {
         const messages = ['', headerText];
 
         // #region meta
