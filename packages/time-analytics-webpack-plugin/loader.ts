@@ -163,7 +163,7 @@ loader.pitch = function () {
         function wrapLoaderModule(module: any) {
             // do the same check as webpack itself
             if (typeof module !== 'function' && typeof module !== 'object') {
-                throw new Error('Bad loader, time analytics plugin is using the same checek as webpack. However, it does not provide more info, disable it to see error from webpack itself.');
+                throw new Error('Time analytics plugin tries to use the same checek as webpack, you see this error because Time analytics plugin think it should be a bug which should also be existed in webpack.');
             }
             // get normal loader function according to module is mjs or cjs
             const originNormalLoaderFunc = typeof module === 'function' ? module : module.default;

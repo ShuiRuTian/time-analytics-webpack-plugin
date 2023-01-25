@@ -11,7 +11,7 @@ class WebpackWeakMapId {
     private id = randomUUID();
 }
 
-assert(WeakMap, 'WeakMap must be existed.');
+assert(WeakMap, 'WeakMap must be existed in current runtime.');
 
 const originSet = WeakMap.prototype.set;
 const originGet = WeakMap.prototype.get;

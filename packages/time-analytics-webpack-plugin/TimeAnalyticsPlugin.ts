@@ -106,32 +106,6 @@ interface WebpackConfigFactory {
 
 export class TimeAnalyticsPlugin implements WebpackPlugin {
     public apply(compiler: Compiler) {
-
-        // Here is already too late, webpack uses weakMap internally in the constructor of Compiler.
-        // Do this hack in WeakMap hack now.
-        // #region Custom_Hooks
-        // Prepare for custom hooks, which use `compiler` as key
-        // Maybe `environment` or `afterEnvironment` hook? Or wrap the parametere directly?
-        // compiler.hooks.initialize.tap({
-        //     name: TimeAnalyticsPlugin.name,
-        //     // Make sure to be called fistly
-        //     stage: -100,
-        // }, () => {
-        //     assert(!(compiler as any)[WEBPACK_WEAK_MAP_ID_KEY], 'add unique id to compilation only once!');
-        //     (compiler as any)[WEBPACK_WEAK_MAP_ID_KEY] = new WebpackWeakMapId();
-        // });
-
-        // Prepare for custom hook, which use `compilation` as key
-        // compiler.hooks.thisCompilation.tap({
-        //     name: TimeAnalyticsPlugin.name,
-        //     // Make sure to be called fistly
-        //     stage: -100,
-        // }, (compilation) => {
-        //     assert(!(compilation as any)[WEBPACK_WEAK_MAP_ID_KEY], 'add unique id to compilation only once!');
-        //     (compilation as any)[WEBPACK_WEAK_MAP_ID_KEY] = new WebpackWeakMapId();
-        // });
-        // #endregion Custom_Hooks
-
         compiler.hooks.compile.tap(TimeAnalyticsPlugin.name, () => {
             analyzer.initilize();
 
@@ -164,7 +138,7 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
     }
 
     public static wrap(webpackConfigOrFactory: Configuration, options?: TimeAnalyticsPluginOptions): Configuration;
-    public static wrap(webpackConfigOrFactory: Configuration, options?: TimeAnalyticsPluginOptions): WebpackConfigFactory;
+    public static wrap(webpackConfigOrFactory: WebpackConfigFactory, options?: TimeAnalyticsPluginOptions): WebpackConfigFactory;
     public static wrap(webpackConfigOrFactory: Configuration | WebpackConfigFactory, options?: TimeAnalyticsPluginOptions) {
         if (options?.enable === false) {
             return webpackConfigOrFactory;
@@ -205,6 +179,7 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
 
 function wrapConfigurationCore(this: TimeAnalyticsPlugin, config: Configuration): Configuration {
     const newConfig = { ...config };
+
     if (this.isPluginEnabled && newConfig.plugins) {
         newConfig.plugins = newConfig.plugins.map((plugin) => {
             const pluginName = plugin.constructor.name;
@@ -215,6 +190,7 @@ function wrapConfigurationCore(this: TimeAnalyticsPlugin, config: Configuration)
         });
         newConfig.plugins = [this, ...newConfig.plugins];
     }
+
     if (this.isPluginEnabled && newConfig.optimization?.minimizer) {
         newConfig.optimization.minimizer = newConfig.optimization.minimizer
             .map((minimizer) => {
@@ -225,9 +201,11 @@ function wrapConfigurationCore(this: TimeAnalyticsPlugin, config: Configuration)
                 return wrapMinimizer(minimizer);
             });
     }
+
     if (this.isLoaderEnabled && newConfig.module) {
         newConfig.module = injectModule(newConfig.module);
     }
+
     return newConfig;
 }
 
@@ -245,7 +223,7 @@ function wrapMinimizer(minimizer: ArrayElement<NonNullable<NonNullable<Configura
     if (isWebpackPlugin(minimizer)) {
         return wrapPluginCore(minimizer);
     }
-    ConsoleHelper.warn(`meet one minimizer which is a function, ${PACKAGE_NAME} can not analyze it now.`);
+    ConsoleHelper.warn(`could not handle function-like minimizer, please convert it to the plugin-like form.`);
     return minimizer;
 }
 
