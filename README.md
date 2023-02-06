@@ -1,11 +1,13 @@
 # Root
-This is a monorepo
+This is a monorepo.
+
+The ***real README*** you usually want to read is [the time-analytics-webpack-plugin package](./packages/time-analytics-webpack-plugin/).
 
 ## File structure
 
-"./packages/time-analytics-webpack-plugin": The real plugin package.
+"./packages/time-analytics-webpack-plugin": The real plugin package
 
-"./packages/test": The test repos.
+"./packages/test": The test repos
 
 ## Q&A
 
