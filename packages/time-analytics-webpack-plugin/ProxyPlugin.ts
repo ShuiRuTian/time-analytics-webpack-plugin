@@ -18,13 +18,12 @@ type TapPromiseCallback = Parameters<TapPromise>[1];
 
 /**
  * How to access currect object from first proxied object
- * For example, in `a.b.c.d`, `b` is the first proxied object, then for d, it's
+ * For example, in `a.b.c.d`, `b` is the first proxied object, then for d, it's ['c', 'd']
  */
 type PropertyTrackPaths = string[];
 
 // TODO: remove webpack 4 support
 let isWebpack4WarnLogged = false;
-
 
 export class ProxyPlugin implements WebpackPlugin {
     private _proxiedPlugin: WebpackPlugin | WebpackPluginLikeFunction;
@@ -51,13 +50,9 @@ export class ProxyPlugin implements WebpackPlugin {
     apply(compiler: Compiler): void {
         const proxiedCompiler = this._proxyForHookProviderCandidates(compiler);
         if (isWebpackPlugin(this._proxiedPlugin)) {
-            // @ts-ignore, here is tricky, TS could not distinguish apply intertaged from Object and a function called apply 
-            // Here is WebpackPlugin instance
-            this._proxiedPlugin.apply(proxiedCompiler);
+            (this._proxiedPlugin as WebpackPlugin).apply(proxiedCompiler);
         } else {
-            // @ts-ignore, here is tricky, TS could not distinguish apply intertaged from Object and a function called apply 
-            // Here is function
-            this._proxiedPlugin.apply(proxiedCompiler, proxiedCompiler);
+            (this._proxiedPlugin as WebpackPluginLikeFunction).apply(proxiedCompiler, proxiedCompiler);
         }
     }
 
@@ -70,6 +65,8 @@ export class ProxyPlugin implements WebpackPlugin {
     }
 
     private cachedProxyForHooksProvider = new Map();
+
+    private cachedUnfrozenHooks = new Map();
 
     _proxyForHookProviderCandidates(
         candidate: any, // @types/webpack does not export all the types. Use `any` for now.
@@ -93,28 +90,37 @@ export class ProxyPlugin implements WebpackPlugin {
                         const originHooks = target[property];
                         // Webpack 4 not freeze the hooks, but Webpack 5 freeze
                         assert(originHooks.constructor.name === 'Object', '`Hooks` should just be plain object');
-                        let hookObject;
-                        if (Object.isFrozen(originHooks)) {
-                            hookObject = { ...originHooks };
-                        } else {
-                            // TODO: remove this support
-                            if (!isWebpack4WarnLogged) {
-                                ConsoleHelper.warn('It seems you are using Webpack 4. However, this plugin is designed for Webpack 5.');
-                                isWebpack4WarnLogged = true;
-                            }
-                            hookObject = originHooks;
-                        }
-                        return that._proxyForHooks(hookObject, [hooksProvider.constructor.name, property]);
+                        const unfrozenHooks = getOrCreate(that.cachedUnfrozenHooks, originHooks, _createUnfrozenHooks);
+                        return that._proxyForHooks(unfrozenHooks);
                     }
                     return target[property];
                 },
             });
         }
+
+        /**
+         * If we use a proxy on frozen object, it's invalid to return a different object with the origin object.
+         * So we need to `Unfrozen` it firstly.
+         */
+        function _createUnfrozenHooks(originHooks: any) {
+            let hookObject;
+            if (Object.isFrozen(originHooks)) {
+                hookObject = { ...originHooks }; 
+            } else {
+                // TODO: remove this support
+                if (!isWebpack4WarnLogged) {
+                    ConsoleHelper.warn('It seems you are using Webpack 4. However, this plugin is designed for Webpack 5.');
+                    isWebpack4WarnLogged = true;
+                }
+                hookObject = originHooks;
+            }
+            return hookObject;
+        }
     }
 
     private cachedProxyForHooks = new Map();
 
-    private _proxyForHooks(hooks: any, propertyTrackPaths: PropertyTrackPaths) {
+    private _proxyForHooks(hooks: any) {
         const that = this;
         return getOrCreate(this.cachedProxyForHooks, hooks, _proxyForHooksWorker);
 
@@ -125,11 +131,11 @@ export class ProxyPlugin implements WebpackPlugin {
                     const method = target[property];
                     switch (true) {
                         case isHook(method):
-                            return that._proxyForHook(method, [...propertyTrackPaths, property]);
+                            return that._proxyForHook(method);
                         case isFakeHook(method): {
                             assert(Object.isFrozen(method), 'fake hook should be frozen');
                             const unfrozenFakeHook = { ...method };
-                            return that._proxyForHook(unfrozenFakeHook, [...propertyTrackPaths, property]);
+                            return that._proxyForHook(unfrozenFakeHook);
                         }
                         case isHookMap(method):
                             return that._proxyForHookMap(method);
@@ -171,7 +177,7 @@ export class ProxyPlugin implements WebpackPlugin {
                 apply: (target, thisArg, argArray) => {
                     const originHook = (target as any).apply(thisArg, argArray);
                     assert(isHook(originHook));
-                    return that._proxyForHook(originHook, []); // FIXME: use the real call path rather than the array
+                    return that._proxyForHook(originHook);
                 },
             });
         }
@@ -179,7 +185,7 @@ export class ProxyPlugin implements WebpackPlugin {
 
     private cachedProxyForHook = new Map();
 
-    private _proxyForHook(hook: any, propertyTrackPaths: PropertyTrackPaths) {
+    private _proxyForHook(hook: any) {
         const that = this;
         return getOrCreate(this.cachedProxyForHook, hook, _proxyForHookWorker);
 

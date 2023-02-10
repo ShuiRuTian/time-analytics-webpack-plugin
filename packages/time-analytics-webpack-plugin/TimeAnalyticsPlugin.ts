@@ -210,7 +210,7 @@ function wrapConfigurationCore(this: TimeAnalyticsPlugin, config: Configuration)
 }
 
 /**
- * Fancy hack to judge whether an object is a Webpack plugin.
+ * Fancy hack to judge whether an object is a Webpack plugin or function.
  */
 export function isWebpackPlugin(p: any): p is WebpackPlugin {
     return typeof p.apply === 'function' && p.apply !== Object.apply;
