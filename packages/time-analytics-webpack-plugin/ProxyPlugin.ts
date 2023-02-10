@@ -91,7 +91,7 @@ export class ProxyPlugin implements WebpackPlugin {
                         // Webpack 4 not freeze the hooks, but Webpack 5 freeze
                         assert(originHooks.constructor.name === 'Object', '`Hooks` should just be plain object');
                         const unfrozenHooks = getOrCreate(that.cachedUnfrozenHooks, originHooks, _createUnfrozenHooks);
-                        return that._proxyForHooks(unfrozenHooks);
+                        return that._proxyForHooks(unfrozenHooks, originHooks);
                     }
                     return target[property];
                 },
@@ -103,30 +103,42 @@ export class ProxyPlugin implements WebpackPlugin {
          * So we need to `Unfrozen` it firstly.
          */
         function _createUnfrozenHooks(originHooks: any) {
-            let hookObject;
+            let hooks;
             if (Object.isFrozen(originHooks)) {
-                hookObject = { ...originHooks }; 
+                // TODO: try to remove in webpack 6
+                hooks = {
+                    // Add this lazily to avoid a warnning:
+                    // DeprecationWarning: Compilation.hooks.normalModuleLoader was moved to NormalModule.getCompilationHooks(compilation).loader
+                    // ...originHooks
+                };
             } else {
                 // TODO: remove this support
                 if (!isWebpack4WarnLogged) {
                     ConsoleHelper.warn('It seems you are using Webpack 4. However, this plugin is designed for Webpack 5.');
                     isWebpack4WarnLogged = true;
                 }
-                hookObject = originHooks;
+                hooks = originHooks;
             }
-            return hookObject;
+            return hooks;
         }
     }
 
     private cachedProxyForHooks = new Map();
 
-    private _proxyForHooks(hooks: any) {
+    private _proxyForHooks(hooks: any, originHooks: any) {
         const that = this;
         return getOrCreate(this.cachedProxyForHooks, hooks, _proxyForHooksWorker);
 
         function _proxyForHooksWorker(hooks: any) {
             return new Proxy(hooks, {
                 get: function (target, property) {
+                    /**
+                     * hooks is frozen in webpak 5, we need to unfrozen it firstly, @see {@link _createUnfrozenHooks} for more background.
+                     * Add the property lazily
+                     */
+                    if (!(property in target)) {
+                        target[property] = originHooks[property];
+                    }
                     assert(typeof property !== 'symbol', 'Getting Symbol property from "hooks", it should never happen, right?');
                     const method = target[property];
                     switch (true) {
