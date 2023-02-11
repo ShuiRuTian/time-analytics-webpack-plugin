@@ -1,7 +1,6 @@
 import type { Compiler, Configuration, ModuleOptions, RuleSetRule } from 'webpack';
 import { AnalyzeInfoKind, analyzer, WebpackMetaEventType } from './analyzer';
 import { ProxyPlugin } from './ProxyPlugin';
-import { normalizeRules } from './loaderHelper';
 import { ConsoleHelper, fail, now } from './utils';
 import './sideEffects/hackWeakMap';
 import { PACKAGE_NAME } from './const';
@@ -223,7 +222,7 @@ function wrapMinimizer(minimizer: ArrayElement<NonNullable<NonNullable<Configura
     if (isWebpackPlugin(minimizer)) {
         return wrapPluginCore(minimizer);
     }
-    ConsoleHelper.warn(`could not handle function-like minimizer, please convert it to the plugin-like form.`);
+    ConsoleHelper.warn('could not handle function-like minimizer, please convert it to the plugin-like form.');
     return minimizer;
 }
 
@@ -246,4 +245,46 @@ function injectModule(moduleOptions: ModuleOptions) {
     function isRuleObjectArray(rules: NonNullable<ModuleOptions['rules']>): rules is RuleSetRule[] {
         return rules.every(rule => rule !== '...');
     }
+}
+
+
+function normalizeRule(rule: RuleSetRule) {
+    if (rule.loader) {
+        rule.use = [rule.loader];
+        if (rule.options) {
+            rule.use[0] = { loader: rule.loader, options: rule.options };
+            delete rule.options;
+        }
+        delete rule.loader;
+    }
+
+    if (rule.use) {
+        if (typeof rule.use === 'function') {
+            fail(`${PACKAGE_NAME} does not support "Rule.use" option as a function now.`);
+        }
+        if (!Array.isArray(rule.use)) rule.use = [rule.use];
+        // Inject into the first one, so that our loader's pitch function is always called at first.
+        const loaderPath = require.resolve('./loader', { paths: [__dirname] });
+        rule.use.unshift(loaderPath);
+    }
+
+    if (rule.oneOf) {
+        rule.oneOf = normalizeRules(rule.oneOf);
+    }
+
+    if (rule.rules) {
+        rule.rules = normalizeRules(rule.rules);
+    }
+
+    return rule;
+}
+
+function normalizeRules(rules: RuleSetRule[] | undefined): RuleSetRule[] | undefined {
+    if (!rules) {
+        return rules;
+    }
+
+    if (Array.isArray(rules)) return rules.map(normalizeRule);
+
+    return rules;
 }

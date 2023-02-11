@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import path from 'path';
-import { getLoaderName } from 'time-analytics-webpack-plugin/loaderHelper';
+import { getLoaderName } from 'time-analytics-webpack-plugin/writer';
 
 const NODE_MODULES_PATH = 'node_modules';
 
