@@ -3,26 +3,10 @@ import path from 'path';
 import assert from 'assert';
 import crypto from 'crypto';
 import { TimeAnalyticsPlugin } from 'time-analytics-webpack-plugin';
-import shelljs from 'shelljs';
-import { MONOREPO_FOLDER_PATH, PROJ_ROOT_PATH, repoInit } from './util';
+import SpeedMeasureWebpackPlugin from 'speed-measure-webpack-plugin';
+import { buildSrc, MONOREPO_FOLDER_PATH, repoInit, setupMonoTestRepo } from './util';
 import type { Configuration, webpack } from 'webpack';
 import { expect } from 'chai';
-
-const setupMonoTestRepo = (): void => {
-  shelljs.pushd();
-  shelljs.cd(MONOREPO_FOLDER_PATH);
-  console.log('install package for test mono repos');
-  shelljs.exec('pnpm i');
-  shelljs.popd();
-};
-
-const buildSrc = () => {
-  shelljs.pushd();
-  shelljs.cd(PROJ_ROOT_PATH);
-  console.log('build source code and link repos');
-  shelljs.exec('pnpm -r run build');
-  shelljs.popd();
-};
 
 buildSrc();
 setupMonoTestRepo();
@@ -75,6 +59,16 @@ describe('Time Analyze Plugin', () => {
           groupedByAbsolutePath: true,
           exclude: [ignoredLoaderName],
         },
+      });
+
+      it.skip(('this case is only used to debug TimeAnalyticsWebpackPlugin'), async () => {
+        await executeWebpack(webpackFunc, wrappedWebpackConfig);
+      });
+
+      it.skip(('this case is only used to debug SpeedMeasureWebpackPlugin'), async () => {
+        const swp = new SpeedMeasureWebpackPlugin();
+        const webpackConfigForSwp: any = swp.wrap(webpackConfig as any);
+        await executeWebpack(webpackFunc, webpackConfigForSwp);
       });
 
       it('should be transparent when use TimeAnalyticsPlugin', async () => {

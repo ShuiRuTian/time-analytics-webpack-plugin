@@ -152,7 +152,7 @@ export class ProxyPlugin implements WebpackPlugin {
                         case isHookMap(method):
                             return that._proxyForHookMap(method);
                         default:
-                            fail('unhandled property from hook');
+                            fail(`unhandled property '${property}' from hook`);
                     }
                 },
             });
