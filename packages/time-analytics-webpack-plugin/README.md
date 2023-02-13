@@ -6,6 +6,25 @@ This plugin will tell the time of loaders and plugins quickly.
 > NOTE: This plugin is still in an early eage, the API is not forzen and might be changed.
 > Consider about this, maybe you want to enable type-check so that you could know the option is changed.
 
+## Install
+Use your favorite package manager:
+
+``` sh
+npm install --save-dev time-analytics-webpack-plugin
+```
+
+or
+
+``` sh
+yarn add -D time-analytics-webpack-plugin
+```
+
+or
+
+``` sh
+pnpm i -D time-analytics-webpack-plugin
+```
+
 ## Output
 By default, the result will be logged into console, but it's able to set the options to make it write to some file.
 
@@ -36,11 +55,16 @@ This is due to how to calcuate the time:
       - Event loop might make it not accurate, because a callback will not be called immediately when it's ready(only if execution stack is empty and all ready tasks before this task in task queue is executed).
     - loader might be parallel.
 
-## How to use it
-Wrap the config, and use the wrapped config.
+## Usage
+Wrap the webpack config and use the returned config:
 
 ``` ts
-const wrappedWebpackConfig = TimeAnalyticsPlugin.wrap(webpackConfig);
+import { TimeAnalyticsPlugin } from 'time-analytics-webpack-plugin';
+
+const webpackConfig = {...}; // This is a valid webpack config, which you used to export.
+
+// Wrap it and use the new wrapped config
+const wrappedWebpackConfig = TimeAnalyticsPlugin.wrap(webpackConfig); // <-- This is the new config, use it so that we 
 
 // Or use options to control behaviors
 const wrappedWebpackConfig = TimeAnalyticsPlugin.wrap(webpackConfig,{ /* options */});
@@ -48,7 +72,17 @@ const wrappedWebpackConfig = TimeAnalyticsPlugin.wrap(webpackConfig,{ /* options
 
 Or wrap a function that will return a configuration
 ```ts
-const wrappedWebpackConfigFactory = TimeAnalyticsPlugin.wrap(webpackConfigFactory);
+import { TimeAnalyticsPlugin } from 'time-analytics-webpack-plugin';
+
+const webpackConfigFactory = (parameters) => {
+    // ...
+    return webpackconfig;
+}
+
+const wrappedWebpackConfigFactory = TimeAnalyticsPlugin.wrap(webpackConfigFactory); // <-- Wrap the factory
+
+const wrappedWebpackConfig = wrappedWebpackConfigFactory(parameters); // <-- the config is already wrapped, you could use it directly.
+
 ```
 
 ## Options 
@@ -196,13 +230,3 @@ So it would be easier to debug. It's not a big deal to download a bit more files
 
 ## Questions
 1. In which condition, will `this.callback()` be called? The doc says for multiple results, but it's kind of confused.
-
-2. For ts
-```ts
-class A{
-    static foo(){
-        hello.call(this); // no error, this is a bug? Because in static method, `this` should be the class itself("typeof A") rather than the class instance.
-    }
-}
-function hello(this:A){}
-```
