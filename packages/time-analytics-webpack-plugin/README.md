@@ -3,9 +3,6 @@ Profiling is the base of optimise.
 
 This plugin will tell the time of loaders and plugins quickly.
 
-> NOTE: This plugin is still in an early eage, the API is not forzen and might be changed.
-> Consider about this, maybe you want to enable type-check so that you could know the option is changed.
-
 ## Install
 Use your favorite package manager:
 
