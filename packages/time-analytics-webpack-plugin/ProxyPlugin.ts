@@ -84,8 +84,8 @@ export class ProxyPlugin implements WebpackPlugin {
     ) {
         const that = this;
 
-        // When webpack use multiple configurations, we will create plugins for each config, which means, same compiler will be called for multi times
-        // Try to get the origin compiler rather than the proxied one.
+        // When webpack use multiple configurations, we will create plugins for each config, which means, same `Compiler` will be called for multi times
+        // Try to get the origin `Compiler` rather than the proxied one.
         // https://webpack.js.org/configuration/configuration-types/#exporting-multiple-configurations
         return getOrCreateHack(this.cachedProxyForHooksProvider, hooksProvider, __proxyForHooksProviderWorker);
 

@@ -115,7 +115,7 @@ interface InternalContext {
      * 
      * https://webpack.js.org/configuration/configuration-types/#exporting-multiple-configurations
      */
-    isTimeAnalyticsPluginApplyCalledOnce :boolean;
+    isTimeAnalyticsPluginAdded :boolean;
 }
 
 interface WebpackConfigFactory {
@@ -168,7 +168,7 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
         };
 
         const internalContext: InternalContext = {
-            isTimeAnalyticsPluginApplyCalledOnce: false,
+            isTimeAnalyticsPluginAdded: false,
         };
 
         return TimeAnalyticsPlugin.wrapCore(webpackConfigOrFactory, internalOptions, internalContext);
@@ -235,9 +235,9 @@ function wrapConfigurationCore(this: TimeAnalyticsPlugin, config: WebpackConfigu
             }
             return wrapPluginCore(plugin);
         });
-        if (!context.isTimeAnalyticsPluginApplyCalledOnce) {
+        if (!context.isTimeAnalyticsPluginAdded) {
             newConfig.plugins.push(this);
-            context.isTimeAnalyticsPluginApplyCalledOnce = true;
+            context.isTimeAnalyticsPluginAdded = true;
         }
     }
 

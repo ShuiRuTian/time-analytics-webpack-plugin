@@ -3,19 +3,19 @@ import { assert } from './utils';
 import { Writer } from './writer';
 
 export enum AnalyzeInfoKind {
-    loader,
-    plugin,
-    webpackMeta,
+    loader = 'loader',
+    plugin = 'plugin',
+    webpackMeta = 'webpackMeta',
 }
 
 export enum LoaderType {
-    pitch,
-    normal,
+    pitch = 'pitch',
+    normal = 'normal',
 }
 
 export enum LoaderEventType {
-    start,
-    end,
+    start = 'start',
+    end = 'end',
 }
 
 export interface LoaderEventInfo {
@@ -49,14 +49,14 @@ export interface LoaderEventInfo {
 }
 
 export enum TapType {
-    normal,
-    async,
-    promise,
+    normal = 'normal',
+    async = 'async',
+    promise = 'promise',
 }
 
 export enum PluginEventType {
-    start,
-    end,
+    start = 'start',
+    end = 'end',
 }
 
 export interface PluginEventInfo {

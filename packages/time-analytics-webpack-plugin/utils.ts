@@ -8,6 +8,8 @@ const MESSAGE_PREFIX = `[${PACKAGE_NAME}]: `;
  * Add prefix "[time-analytics-webpack-plugin]: " prefix to all meesages
  */
 export class ConsoleHelper {
+    static debug = ConsoleHelper.log;
+
     static log(message: string) {
         console.log(ConsoleHelper.getMessage(message));
     }
