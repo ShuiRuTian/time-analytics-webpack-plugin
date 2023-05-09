@@ -1,4 +1,4 @@
-import type { Compiler, Configuration, ModuleOptions, RuleSetRule } from 'webpack';
+import type { Compiler, Configuration as WebpackConfiguration, ModuleOptions, RuleSetRule, webpack } from 'webpack';
 import { AnalyzeInfoKind, analyzer, WebpackMetaEventType } from './analyzer';
 import { ProxyPlugin } from './ProxyPlugin';
 import { ConsoleHelper, fail, now } from './utils';
@@ -13,6 +13,13 @@ export declare class WebpackPlugin {
 }
 
 export type WebpackPluginLikeFunction = (this: Compiler, compiler: Compiler) => void;
+
+// Tricky, seems typescript does not infer overload function parameters well.
+export type MultiWebpackConfiguration = Parameters<typeof webpack>[0];
+
+export function isMultiWebpackConfiguration(config: WebpackConfiguration | MultiWebpackConfiguration | WebpackConfigFactory): config is MultiWebpackConfiguration {
+    return Array.isArray(config);
+}
 
 interface TimeAnalyticsPluginOptions {
     /**
@@ -99,8 +106,20 @@ interface TimeAnalyticsPluginOptions {
     }
 }
 
+interface InternalContext { 
+    /**
+     * When webpack uses multiple configurations, we only want to apply TimeAnalyticsPlugin once,
+     * to output only once and works correctly.
+     * 
+     * This works, because the webpack will reuse the `Compiler` for all of the configurations.
+     * 
+     * https://webpack.js.org/configuration/configuration-types/#exporting-multiple-configurations
+     */
+    isTimeAnalyticsPluginApplyCalledOnce :boolean;
+}
+
 interface WebpackConfigFactory {
-    (...args: any[]): Configuration;
+    (...args: any[]): WebpackConfiguration | MultiWebpackConfiguration;
 }
 
 export class TimeAnalyticsPlugin implements WebpackPlugin {
@@ -136,17 +155,43 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
         this.option = option;
     }
 
-    public static wrap(webpackConfigOrFactory: Configuration, options?: TimeAnalyticsPluginOptions): Configuration;
+    public static wrap(webpackConfigOrFactory: WebpackConfiguration, options?: TimeAnalyticsPluginOptions): WebpackConfiguration;
+    public static wrap(webpackConfigOrFactory: MultiWebpackConfiguration, options?: TimeAnalyticsPluginOptions): MultiWebpackConfiguration;
     public static wrap(webpackConfigOrFactory: WebpackConfigFactory, options?: TimeAnalyticsPluginOptions): WebpackConfigFactory;
-    public static wrap(webpackConfigOrFactory: Configuration | WebpackConfigFactory, options?: TimeAnalyticsPluginOptions) {
+    public static wrap(webpackConfigOrFactory: WebpackConfiguration | MultiWebpackConfiguration | WebpackConfigFactory, options?: TimeAnalyticsPluginOptions) {
         if (options?.enable === false) {
             return webpackConfigOrFactory;
         }
-        const timeAnalyticsPlugin = new TimeAnalyticsPlugin(options);
-        if (typeof webpackConfigOrFactory === 'function') {
-            return (...args: any[]) => wrapConfigurationCore.call(timeAnalyticsPlugin, webpackConfigOrFactory(...args));
+
+        const internalOptions: TimeAnalyticsPluginOptions = {
+            ...options,
+        };
+
+        const internalContext: InternalContext = {
+            isTimeAnalyticsPluginApplyCalledOnce: false,
+        };
+
+        return TimeAnalyticsPlugin.wrapCore(webpackConfigOrFactory, internalOptions, internalContext);
+    }
+
+    private static wrapCore(webpackConfigOrFactory: WebpackConfiguration, options: TimeAnalyticsPluginOptions, context:InternalContext): WebpackConfiguration;
+    private static wrapCore(webpackConfigOrFactory: MultiWebpackConfiguration, options: TimeAnalyticsPluginOptions, context:InternalContext): MultiWebpackConfiguration;
+    private static wrapCore(webpackConfigOrFactory: WebpackConfigFactory, options: TimeAnalyticsPluginOptions, context:InternalContext): WebpackConfigFactory;
+    private static wrapCore(webpackConfigOrFactory: WebpackConfiguration | MultiWebpackConfiguration | WebpackConfigFactory, options: TimeAnalyticsPluginOptions, context:InternalContext): WebpackConfiguration | MultiWebpackConfiguration | WebpackConfigFactory;
+    private static wrapCore(webpackConfigOrFactory: WebpackConfiguration | MultiWebpackConfiguration | WebpackConfigFactory, options: TimeAnalyticsPluginOptions, context:InternalContext) {
+        if (isMultiWebpackConfiguration(webpackConfigOrFactory)) {
+            const res: MultiWebpackConfiguration = webpackConfigOrFactory.map(config => TimeAnalyticsPlugin.wrapCore(config, options, context));
+            res.parallelism = webpackConfigOrFactory.parallelism;
+            return res;
         }
-        return wrapConfigurationCore.call(timeAnalyticsPlugin, webpackConfigOrFactory);
+
+        const timeAnalyticsPlugin = new TimeAnalyticsPlugin(options);
+
+        if (typeof webpackConfigOrFactory === 'function') {
+            return (...args: any[]) => wrapConfigurationCore.call(timeAnalyticsPlugin, webpackConfigOrFactory(...args), context);
+        }
+
+        return wrapConfigurationCore.call(timeAnalyticsPlugin, webpackConfigOrFactory, context);
     }
 
     get isLoaderEnabled(): boolean {
@@ -176,10 +221,13 @@ export class TimeAnalyticsPlugin implements WebpackPlugin {
     }
 }
 
-function wrapConfigurationCore(this: TimeAnalyticsPlugin, config: Configuration): Configuration {
+function wrapConfigurationCore(this: TimeAnalyticsPlugin, config: WebpackConfiguration, context: InternalContext): WebpackConfiguration {
     const newConfig = { ...config };
 
-    if (this.isPluginEnabled && newConfig.plugins) {
+    // ensure there is an array, so that `TimeAnalyticsPlugin` could be inserted anyway.
+    newConfig.plugins = newConfig.plugins ?? [];
+
+    if (this.isPluginEnabled) {
         newConfig.plugins = newConfig.plugins.map((plugin) => {
             const pluginName = plugin.constructor.name;
             if (this.option?.plugin?.exclude?.includes(pluginName)) {
@@ -187,7 +235,10 @@ function wrapConfigurationCore(this: TimeAnalyticsPlugin, config: Configuration)
             }
             return wrapPluginCore(plugin);
         });
-        newConfig.plugins = [this, ...newConfig.plugins];
+        if (!context.isTimeAnalyticsPluginApplyCalledOnce) {
+            newConfig.plugins.push(this);
+            context.isTimeAnalyticsPluginApplyCalledOnce = true;
+        }
     }
 
     if (this.isPluginEnabled && newConfig.optimization?.minimizer) {
@@ -218,7 +269,7 @@ export function isWebpackPlugin(p: any): p is WebpackPlugin {
 type ArrayElement<ArrayType extends readonly unknown[]> =
     ArrayType extends readonly (infer ElementType)[] ? ElementType : never;
 
-function wrapMinimizer(minimizer: ArrayElement<NonNullable<NonNullable<Configuration['optimization']>['minimizer']>>) {
+function wrapMinimizer(minimizer: ArrayElement<NonNullable<NonNullable<WebpackConfiguration['optimization']>['minimizer']>>) {
     if (isWebpackPlugin(minimizer)) {
         return wrapPluginCore(minimizer);
     }

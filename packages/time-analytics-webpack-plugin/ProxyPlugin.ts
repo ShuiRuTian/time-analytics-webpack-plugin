@@ -16,6 +16,8 @@ type TapCallback = Parameters<Tap>[1];
 type TapAsyncCallback = Parameters<TapAsync>[1];
 type TapPromiseCallback = Parameters<TapPromise>[1];
 
+const PROXY_TARGET_MAGIC_STRING = '__TAP__PROXY_TARGET';
+
 /**
  * How to access currect object from first proxied object
  * For example, in `a.b.c.d`, `b` is the first proxied object, then for d, it's ['c', 'd']
@@ -81,7 +83,11 @@ export class ProxyPlugin implements WebpackPlugin {
         hooksProvider: any, // @types/webpack does not export all the types. Use `any` for now.
     ) {
         const that = this;
-        return getOrCreate(this.cachedProxyForHooksProvider, hooksProvider, __proxyForHooksProviderWorker);
+
+        // When webpack use multiple configurations, we will create plugins for each config, which means, same compiler will be called for multi times
+        // Try to get the origin compiler rather than the proxied one.
+        // https://webpack.js.org/configuration/configuration-types/#exporting-multiple-configurations
+        return getOrCreateHack(this.cachedProxyForHooksProvider, hooksProvider, __proxyForHooksProviderWorker);
 
         function __proxyForHooksProviderWorker(hooksProvider: any) {
             return new Proxy(hooksProvider, {
@@ -377,10 +383,20 @@ function wrapTapPromiseCallback(this: ProxyPlugin, tapCallback: TapPromiseCallba
     };
 }
 
+function getOrCreateHack<K, V>(cache: Map<K, V>, key: K & { [PROXY_TARGET_MAGIC_STRING]: any; }, factory: (k: K) => V) {
+    if (key[PROXY_TARGET_MAGIC_STRING]) {
+        key = key[PROXY_TARGET_MAGIC_STRING];
+    }
+    const res = getOrCreate(cache, key, factory);
+    // @ts-ignore
+    res[PROXY_TARGET_MAGIC_STRING] ??= key;
+    return res;
+}
+
 function getOrCreate<K, V>(cache: Map<K, V>, key: K, factory: (k: K) => V) {
     if (!cache.has(key)) {
-        const proxyForHooks = factory(key);
-        cache.set(key, proxyForHooks);
+        const value = factory(key);
+        cache.set(key, value);
     }
     return cache.get(key)!;
 }
